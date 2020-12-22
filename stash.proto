@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package stash;
+
+// Rename to Documents
+service Secrets {
+  rpc Put (PutRequest) returns (PutReply) {}
+  rpc Get (GetRequest) returns (GetReply) {}
+  rpc Query (QueryRequest) returns (QueryReply) {}
+}
+
+// TODO: Rename key to id
+message PutRequest {
+  bytes handle = 1;
+  bytes value = 2;
+  bytes collectionId = 3;
+  bytes postingHandle = 4;
+  repeated bytes term = 5;
+}
+
+message PutReply {
+}
+
+message GetRequest {
+  bytes handle = 1;
+  bytes collectionId = 2;
+}
+
+message GetReply {
+  bytes value = 1;
+}
+
+message QueryRequest {
+  bytes collectionId = 1;
+  repeated bytes term = 2; // TODO: Perhaps terms, pairs and ordering should properly defined in the protobuf
+  uint32 limit = 3; // Default will be 0 which means "no limit"
+}
+
+message QueryReply {
+  repeated bytes result = 1;
+}
