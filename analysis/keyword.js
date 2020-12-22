@@ -1,15 +1,9 @@
 const SipHash = require('siphash');
-const Analysis = {}
 const SIPKEY = [ 0xdeadbeef, 0xcafebabe, 0x8badf00d, 0x1badb002 ];
 
-// TODO: Inherit from base - are interfaces a thing?
-Analysis.Keyword = class {
-  // TODO: Field max is 127 (or 7 bits)
-  constructor(field, term) {
-    this.field = field
-    this.term = term;
-  }
+const Base = require('./base');
 
+class Keyword extends Base {
   perform() {
     const {h: h, l: l} = SipHash.hash(SIPKEY, this.term);
     const buff = Buffer.alloc(8);
@@ -24,4 +18,4 @@ Analysis.Keyword = class {
   }
 }
 
-module.exports = Analysis;
+module.exports = Keyword;

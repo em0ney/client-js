@@ -1,7 +1,7 @@
-const Analysis = require('./keyword');
+const Keyword = require('./keyword');
 
 test('term generates a 64-bit BE unsigned int, field=0 (siphash)', () => {
-  const kw = new Analysis.Keyword(0, "foo@example.com");
+  const kw = new Keyword(0, "foo@example.com");
   const result = kw.perform();
 
   expect(result).toBe(112737027418868639n);
@@ -13,7 +13,7 @@ test('term generates a 64-bit BE unsigned int, field=0 (siphash)', () => {
 });
 
 test('term generates a 64-bit BE unsigned int, field=7 (siphash)', () => {
-  const kw = new Analysis.Keyword(7, "foo@example.com");
+  const kw = new Keyword(7, "foo@example.com");
   const result = kw.perform();
 
   expect(result).toBe(1121543343949859743n);
