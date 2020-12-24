@@ -1,5 +1,5 @@
 {
-  "name": "cipherstash",
+  "name": "@cipherstash/client",
   "version": "0.0.1",
   "description": "CipherStash client",
   "main": "index.js",
@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@cipherstash/ore": "0.0.2",
     "@grpc/grpc-js": "^1.2.2",
     "@grpc/proto-loader": "^0.5.5",
     "siphash": "^1.1.0"

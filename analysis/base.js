@@ -1,8 +1,7 @@
 module.exports = class Base {
   // TODO: Field max is 127 (or 7 bits)
-  constructor(field, term) {
+  constructor(field) {
     this.field = field
-    this.term = term;
   }
 }
 

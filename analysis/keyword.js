@@ -4,8 +4,8 @@ const SIPKEY = [ 0xdeadbeef, 0xcafebabe, 0x8badf00d, 0x1badb002 ];
 const Base = require('./base');
 
 class Keyword extends Base {
-  perform() {
-    const {h: h, l: l} = SipHash.hash(SIPKEY, this.term);
+  perform(term) {
+    const {h: h, l: l} = SipHash.hash(SIPKEY, term);
     const buff = Buffer.alloc(8);
     buff.writeUint32BE(h)
     buff.writeUint32BE(l, 4)

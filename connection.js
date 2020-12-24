@@ -38,6 +38,28 @@ class Connection {
       }
     });
   }
+
+  // TODO: It may be easier to rename terms to postings and postingHandle to docId
+  // or even pseudoDocID
+  put(collectionId, handle, postingHandle, postings, callback) {
+    const request = {
+      handle: handle,
+      collectionId: collectionId,
+      value: Buffer.from("this is a sample"), // TODO: Serialize and encrypt the body
+      postingHandle: postingHandle,
+      term: postings
+    }
+
+    console.log("REQUEST", request);
+
+    this.stub.Put(request, (err, res) => {
+      if (err) {
+        callback(err, null);
+      } else {
+        callback(false, res.value);
+      }
+    });
+  }
 }
 
-exports.Connection = Connection;
+module.exports = Connection;
