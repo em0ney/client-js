@@ -13,6 +13,7 @@
     "@grpc/grpc-js": "^1.2.2",
     "@grpc/proto-loader": "^0.5.5",
     "siphash": "^1.1.0",
+    "unicode-tokenizer": "^1.1.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
