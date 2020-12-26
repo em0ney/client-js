@@ -1,12 +1,14 @@
 const ORE = require('@cipherstash/ore');
+const Query = require('./query');
+const { v4: uuidv4, parse: parseUUID } = require('uuid');
 
 class Collection {
   #ore = null;
 
   /* key is a 32 byte Buffer containing both the prf and prp keys */
-  constructor(connection, uuid, key, options = {}) {
+  constructor(connection, uuidStr, key, options = {}) {
     this.connection = connection;
-    this.uuid = uuid;
+    this.uuid = parseUUID(uuidStr);
     this.#ore = new ORE(key.slice(0, 16), key.slice(16, 32));
     this.autoGeneratePKey = options.autoGeneratePKey;
     this.pKey = 'id';
@@ -19,17 +21,21 @@ class Collection {
   }
 
   get(id, callback) {
-    const docId = Buffer.alloc(8);
-    docId.writeBigUInt64BE(id);
+    const docId = this.#asBuffer(id);
     this.connection.get(this.uuid, docId, callback);
   }
 
-  // TODO: Analyzers need to have the field index "baked in"
   put(attrs, callback) {
     const postings = this.encryptTermsForInsertion(attrs);
-    // TODO: Autogenerate or error if no ID present
-    const docId = Buffer.alloc(8);
-    docId.writeBigUInt64BE(attrs.id);
+    let docId = null;
+
+    if (attrs.id) {
+      docId = this.#asBuffer(attrs.id);
+    } else {
+      docId = uuidv4({}, Buffer.alloc(16));
+    }
+
+    console.log("HANDLE:", docId);
 
     // TODO: Value
     this.connection.put(
@@ -41,7 +47,39 @@ class Collection {
     );
   }
 
+  query(constraints, callback) {
+    const query = new Query(constraints, this.analyzers);
+    const queryTerms = this.encryptTermsForQuery(query.constraints);
+    console.log("QT", queryTerms);
+
+    // TODO: Don't actually do the call here - use a chained DSL
+    this.connection.query(this.uuid, queryTerms, {}, callback);
+  }
+
+  encryptTermsForQuery(terms) {
+    return terms.map((term) => {
+      // TODO: Only left terms should be required for the query!
+      if (term instanceof Array && term.length == 2) {
+        const [min, max] = term;
+        const {left: minL, right: maxL} = this.#ore.encrypt(min);
+        const {left: minR, right: maxR} = this.#ore.encrypt(max);
+
+        return Buffer.concat([
+          Buffer.from([1]),
+          minL,
+          minR,
+          maxL,
+          maxR
+        ]);
+      } else {
+        const {left: left, right: right} = this.#ore.encrypt(term);
+        return Buffer.concat([Buffer.from([0]), left, right]);
+      }
+    });
+  }
+
   // TODO: Private
+  // Maybe this could use an Insertion class and follow the same pattern as for Query above?
   encryptTermsForInsertion(attrs) {
     const out = []
 
@@ -57,6 +95,17 @@ class Collection {
       }
     }
     return out;
+  }
+
+  #asBuffer(id) {
+    // TODO: Check that id is a num, bigint smaller than 64bits or a Buffer
+    if (id instanceof Buffer) {
+      return id;
+    } else {
+      const buf = Buffer.alloc(8);
+      buf.writeBigUInt64BE(id);
+      return buf;
+    }
   }
 }
 

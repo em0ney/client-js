@@ -12,7 +12,8 @@
     "@cipherstash/ore": "0.0.2",
     "@grpc/grpc-js": "^1.2.2",
     "@grpc/proto-loader": "^0.5.5",
-    "siphash": "^1.1.0"
+    "siphash": "^1.1.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "jest": "^26.6.3"

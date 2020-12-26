@@ -30,18 +30,13 @@ class Connection {
       handle: handle
     };
 
-    this.stub.Get(request, (err, res) => {
-      if (err) {
-        callback(err, null);
-      } else {
-        callback(false, res.value);
-      }
-    });
+    this.stub.Get(request, callback);
   }
 
   // TODO: It may be easier to rename terms to postings and postingHandle to docId
   // or even pseudoDocID
   put(collectionId, handle, postingHandle, postings, callback) {
+    // TODO: Validate args (e.g. handle must not be null and must be a Buffer) - TypeScript?
     const request = {
       handle: handle,
       collectionId: collectionId,
@@ -50,15 +45,18 @@ class Connection {
       term: postings
     }
 
-    console.log("REQUEST", request);
+    this.stub.Put(request, callback);
+  }
 
-    this.stub.Put(request, (err, res) => {
-      if (err) {
-        callback(err, null);
-      } else {
-        callback(false, res.value);
-      }
-    });
+  query(collectionId, terms, options, callback) {
+    const limit = options.limit || 20;
+    const request = {
+      collectionId: collectionId,
+      term: terms,
+      limit: limit
+    };
+
+    this.stub.Query(request, callback);
   }
 }
 

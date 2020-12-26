@@ -16,6 +16,15 @@ class Keyword extends Base {
     // TODO: ORE Encrypt (in the caller but not here)
     return buff.readBigUint64BE();
   }
+
+  // TODO: Test this
+  performForQuery(predicate, term) {
+    if (predicate == "==") {
+      return this.perform(term);
+    } else {
+      throw("Unsupported predicate for Keyword type: '" + predicate + "'");
+    }
+  }
 }
 
 module.exports = Keyword;
