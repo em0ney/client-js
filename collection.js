@@ -35,8 +35,6 @@ class Collection {
       docId = uuidv4({}, Buffer.alloc(16));
     }
 
-    console.log("HANDLE:", docId);
-
     // TODO: Value
     this.connection.put(
       this.uuid,
@@ -50,7 +48,6 @@ class Collection {
   query(constraints, callback) {
     const query = new Query(constraints, this.analyzers);
     const queryTerms = this.encryptTermsForQuery(query.constraints);
-    console.log("QT", queryTerms);
 
     // TODO: Don't actually do the call here - use a chained DSL
     this.connection.query(this.uuid, queryTerms, {}, callback);
@@ -61,8 +58,8 @@ class Collection {
       // TODO: Only left terms should be required for the query!
       if (term instanceof Array && term.length == 2) {
         const [min, max] = term;
-        const {left: minL, right: maxL} = this.#ore.encrypt(min);
-        const {left: minR, right: maxR} = this.#ore.encrypt(max);
+        const {left: minL, right: minR} = this.#ore.encrypt(min);
+        const {left: maxL, right: maxR} = this.#ore.encrypt(max);
 
         return Buffer.concat([
           Buffer.from([1]),
@@ -88,10 +85,14 @@ class Collection {
         // TODO: Handle null analyzer
         const analyzer = this.analyzers[attr];
         const value = attrs[attr];
-        const plainText = analyzer.perform(value);
-        const {left: left, right: right} = this.#ore.encrypt(plainText);
+        const plainTexts = analyzer.perform(value);
 
-        out.push(Buffer.concat([left, right]));
+        /* Handle analyzers that return a single term and those
+         * that return an array */
+        [].concat(plainTexts).forEach((plainText) => {
+          const {left: left, right: right} = this.#ore.encrypt(plainText);
+          out.push(Buffer.concat([left, right]));
+        });
       }
     }
     return out;

@@ -6,7 +6,7 @@ class Query {
 
   // TODO: Use null object pattern for analyzers
   #analyzeConstraints(constraints, analyzers) {
-      const ret = Object.entries(constraints).map((constraint) => {
+      const ret = Object.entries(constraints).flatMap((constraint) => {
         const [attr, condition] = constraint;
         const analyzer = analyzers[attr];
 

@@ -11,7 +11,7 @@ class Keyword extends Base {
     if (predicate == "==") {
       return this.perform(term);
     } else {
-      throw("Unsupported predicate for Keyword type: '" + predicate + "'");
+      this.throwUnknownPredicate(predicate);
     }
   }
 }

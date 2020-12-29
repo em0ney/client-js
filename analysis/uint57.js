@@ -18,23 +18,23 @@ class UInt57 extends Base {
   performForQuery(predicate, value) {
     switch (predicate) {
       case "==":
-        return this.perform(value);
+        return [this.perform(value)];
 
       case ">=":
-        return [this.perform(value), this.perform(MAX_VALUE)];
+        return [[this.perform(value), this.perform(MAX_VALUE)]];
 
       case "<=":
-        return [0n, this.perform(value)];
+        return [[0n, this.perform(value)]];
 
       case ">":
-        return [this.perform(BigInt(value) + 1n), this.perform(MAX_VALUE)];
+        return [[this.perform(BigInt(value) + 1n), this.perform(MAX_VALUE)]];
 
       case "<":
-        return [0n, this.perform(BigInt(value) - 1n)];
+        return [[0n, this.perform(BigInt(value) - 1n)]];
 
       case "><":
         const [min, max] = value;
-        return [this.perform(min), this.perform(max)];
+        return [[this.perform(min), this.perform(max)]];
 
       default:
         this.throwUnknownPredicate(predicate);

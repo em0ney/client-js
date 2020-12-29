@@ -13,6 +13,14 @@ class TypeAhead extends Base {
     return terms;
   }
 
+  performForQuery(predicate, term) {
+    if (predicate == "MATCH") {
+      return this.perform(term);
+    } else {
+      this.throwUnknownPredicate(predicate);
+    }
+  }
+
   ngrams(str, length = 3) {
     const array = [...str];
     const ngramsArray = [];
