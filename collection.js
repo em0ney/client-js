@@ -45,34 +45,11 @@ class Collection {
     );
   }
 
-  query(constraints, callback) {
-    const query = new Query(constraints, this.analyzers);
-    const queryTerms = this.encryptTermsForQuery(query.constraints);
+  query(constraints) {
+    return new Query(this.connection, this.uuid, this.#ore, constraints, this.analyzers);
+    //const queryTerms = this.encryptTermsForQuery(query.constraints);
 
-    // TODO: Don't actually do the call here - use a chained DSL
-    this.connection.query(this.uuid, queryTerms, {}, callback);
-  }
-
-  encryptTermsForQuery(terms) {
-    return terms.map((term) => {
-      // TODO: Only left terms should be required for the query!
-      if (term instanceof Array && term.length == 2) {
-        const [min, max] = term;
-        const {left: minL, right: minR} = this.#ore.encrypt(min);
-        const {left: maxL, right: maxR} = this.#ore.encrypt(max);
-
-        return Buffer.concat([
-          Buffer.from([1]),
-          minL,
-          minR,
-          maxL,
-          maxR
-        ]);
-      } else {
-        const {left: left, right: right} = this.#ore.encrypt(term);
-        return Buffer.concat([Buffer.from([0]), left, right]);
-      }
-    });
+    //return this.connection.query(this.uuid, queryTerms, options);
   }
 
   // TODO: Private

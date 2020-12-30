@@ -11,7 +11,20 @@ col.analyze('name', new Analysis.TypeAhead(2));
 
 // TODO: We could make this a Jest test against a real CS instance (E2E test)
 
-[
+function gte(val) {
+  let target = BigInt(val);
+  return [">=", target];
+}
+
+col.query({count: gte(0)}).all(20)
+.then((res) => console.log("MANY", res))
+  .catch((err) => console.log("ERROR", err));
+
+col.query({count: gte(0)}).one()
+  .then((res) => console.log("ONE", res))
+  .catch((err) => console.log("ERROR", err));
+
+  /*[
   {count: [">=", 0n]},
   {name: ["MATCH", "Dan"]}
 ].forEach((query, index) => {
@@ -24,4 +37,4 @@ col.analyze('name', new Analysis.TypeAhead(2));
       console.log("RESPONSE [", index, "]: ", res.result.toString());
     }
   });
-});
+  });*/
