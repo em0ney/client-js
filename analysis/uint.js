@@ -3,7 +3,7 @@ const Base = require('./base');
 const NUM_BITS = 57
 const MAX_VALUE = ((1n << BigInt(NUM_BITS)) - 1n)
 
-class UInt57 extends Base {
+class UInt extends Base {
   perform(term) {
     // TODO: Force conversion to Bigint - and test that
     const term64 = BigInt(term);
@@ -42,4 +42,4 @@ class UInt57 extends Base {
   }
 }
  
-module.exports = UInt57;
+module.exports = UInt;

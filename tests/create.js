@@ -7,7 +7,7 @@ const collectionId = "de8c0950-3274-4cb8-8298-af1d5989fdfe";
 const client = new Client('localhost:50051');
 const col = client.collection(collectionId, KEY);
 col.analyze('email', new Analysis.Keyword(0));
-col.analyze('count', new Analysis.UInt57(1));
+col.analyze('count', new Analysis.UInt(1));
 col.analyze('name', new Analysis.TypeAhead(2));
 
 //const id = Buffer.from('aabbc074984a4fd7b9059d9092f98bf8', 'hex');
