@@ -1,18 +1,23 @@
 
 const Base = require('./base');
-const NUM_BITS = 57
+// TODO: Move these to methods on the base
+const FIELD_SIZE = 8
+const NUM_BITS = 56
 const MAX_VALUE = ((1n << BigInt(NUM_BITS)) - 1n)
 
 class UInt extends Base {
   perform(term) {
     // TODO: Force conversion to Bigint - and test that
-    const term64 = BigInt(term);
-    const buff = Buffer.alloc(8);
-    buff.writeBigUInt64BE(term64);
-    buff.writeUint8((this.field << 1) + (buff.readUint8() & 1));
+    const term64 = BigInt(term)
+    const buff = Buffer.alloc(8)
 
-    // TODO: ORE Encrypt (in the caller but not here)
-    return buff.readBigUint64BE();
+    /* Set the buffer to the big int value 
+     * and then set the first byte to the field.
+     * This will truncate integers larger than 56 bits */
+    buff.writeBigUInt64BE(term64)
+    buff.writeUint8(this.field)
+
+    return buff
   }
 
   performForQuery(predicate, value) {

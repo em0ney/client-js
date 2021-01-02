@@ -21,7 +21,9 @@ class Connection {
     this.stub = new stash.Secrets(host, creds);
   }
 
-  //put(collectionId, handle)
+  close() {
+    this.stub.close()
+  }
 
   // TODO: Use typescript and be strict about the callback type
   get(collectionId, handle, callback) {

@@ -1,8 +1,5 @@
 
-const Analysis = require('./analysis');
-
-const ta = new Analysis.TypeAhead(2);
-console.log(ta.perform("dan@coderdan.co"));
-
-const kw = new Analysis.Keyword(1);
-console.log(kw.perform("dan@coderdan.co"));
+buf = Buffer.from([10, 10, 10, 10, 10, 10, 10, 10])
+console.log(buf.readBigInt64BE())
+let check = (BigInt(buf.readUint32BE()) << 32n) + BigInt(buf.readUint32BE(4))
+console.log(check)

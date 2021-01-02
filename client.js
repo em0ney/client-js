@@ -10,6 +10,10 @@ class Client {
   collection(uuid, options = {}) {
     return new Collection(this.connection, uuid, options);
   }
+
+  close() {
+    this.connection.close()
+  }
 }
 
 module.exports = Client;
