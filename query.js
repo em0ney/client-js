@@ -1,38 +1,48 @@
 
 class Query {
-  constructor(connection, collectionId, ore, constraints, mapping) {
+  constructor(connection, collectionId, ore, constraints, mapping, cipher) {
+    // TODO: Most if not all of these things could be delegated to the collection!
     this.connection = connection;
     this.collectionId = collectionId;
+    this.cipher = cipher
     let plaintextTerms = this.#analyzeConstraints(constraints, mapping);
     this.queryTerms = this.#encryptTermsForQuery(plaintextTerms, ore);
   }
 
-  one() {
-    return new Promise((resolve, reject) => {
-      this.connection.query(this.collectionId, this.queryTerms, {limit: 1}, (err, res) => {
-        if (err) {
-          reject(err);
-        } else {
-          if (res.result instanceof Array && res.result.length > 0) {
-            resolve({result: res.result[0]});
-          } else {
-            resolve(null);
-          }
-        }
-      });
+  async one() {
+    // TODO: Move to a buildRequest function
+    const request = {
+      collectionId: this.collectionId,
+      term: this.queryTerms,
+      limit: 1
+    }
+
+    return this.connection.query(request).then(({ result }) => {
+      if (result instanceof Array && result.length > 0) {
+        return this.decrypt(result[0])
+      } else {
+        return null;
+      }
     });
   }
 
-  all(limit = 20) {
-    return new Promise((resolve, reject) => {
-      this.connection.query(this.collectionId, this.queryTerms, {limit: limit}, (err, res) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(res);
-        }
-      });
-    });
+  async all(limit = 20) {
+
+    // TODO: Move to a buildRequest function
+    const request = {
+      collectionId: this.collectionId,
+      term: this.queryTerms,
+      limit: limit
+    }
+
+    return this.connection.query(request).then(({ result }) => {
+      // TODO: Implement a decryptAll function which takes a list (or stream)
+      return Promise.all(result.map((entry) => this.decrypt(entry)))
+    })
+  }
+
+  decrypt(ciphertext) {
+    return this.cipher.decrypt(ciphertext)
   }
 
   // TODO: Use null object pattern for analyzers

@@ -1,10 +1,18 @@
 
+const AWS = require("aws-sdk")
 const Client = require('../client');
 const Analysis = require('../analysis');
-const KEY = Buffer.from('2e877eebe7f0b8ef1492f314d66c4dcce6c53234aa05cfe2dd54df83d18d09be', 'hex');
 
+// Not needed when running in lambda
+var credentials = new AWS.SharedIniFileCredentials({profile: 'dev'});
+AWS.config.credentials = credentials;
+
+const KEY = Buffer.from('2e877eebe7f0b8ef1492f314d66c4dcce6c53234aa05cfe2dd54df83d18d09be', 'hex');
+const generatorKeyId = 'arn:aws:kms:ap-southeast-2:377140853070:key/80c0f67d-e02a-4b59-a314-80a07ef0d4a2'
+
+// TODO: Don't pass the generatorKeyId, set a Cipher in a collection spec
 const collectionId = "de8c0950-3274-4cb8-8298-af1d5989fdfe";
-const client = new Client('localhost:50051');
+const client = new Client('localhost:50051', { generatorKeyId });
 const Users = client.collection(collectionId, KEY);
 Users.mapping.setField('email', new Analysis.Keyword(0));
 Users.mapping.setField('count', new Analysis.UInt(1));
@@ -22,11 +30,9 @@ function gte(val) {
 
 Users.query({count: gte(0)}).all(20)
 .then((res) => console.log("MANY", res))
-  .catch((err) => console.log("ERROR", err));
 
 Users.query({count: gte(0)}).one()
   .then((res) => console.log("ONE", res))
-  .catch((err) => console.log("ERROR", err));
 
   /*[
   {count: [">=", 0n]},

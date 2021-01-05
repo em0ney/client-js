@@ -25,40 +25,44 @@ class Connection {
     this.stub.close()
   }
 
-  // TODO: Use typescript and be strict about the callback type
-  get(collectionId, handle, callback) {
-    const request = {
-      collectionId: collectionId,
-      handle: handle
-    };
-
-    this.stub.Get(request, callback);
+  get(request) {
+     return new Promise((resolve, reject) => {
+      this.stub.Get(request, (err, res) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(res)
+        }
+      })
+    })
   }
 
   // TODO: It may be easier to rename terms to postings and postingHandle to docId
   // or even pseudoDocID
-  put(collectionId, handle, postingHandle, postings, callback) {
-    // TODO: Validate args (e.g. handle must not be null and must be a Buffer) - TypeScript?
-    const request = {
-      handle: handle,
-      collectionId: collectionId,
-      value: Buffer.from("this is a sample"), // TODO: Serialize and encrypt the body
-      postingHandle: postingHandle,
-      term: postings
-    }
-
-    this.stub.Put(request, callback);
+  // TODO: Validate args (e.g. handle must not be null and must be a Buffer) - TypeScript?
+  put(request) {
+    return new Promise((resolve, reject) => {
+      this.stub.Put(request, (err, res) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(res)
+        }
+      })
+    })
   }
 
-  query(collectionId, terms, options, callback) {
-    const limit = options.limit || 20;
-    const request = {
-      collectionId: collectionId,
-      term: terms,
-      limit: limit
-    };
-
-    this.stub.Query(request, callback);
+  query(request) {
+    return new Promise((resolve, reject) => {
+      // TODO: Can this callback be extracted out?
+      this.stub.Query(request, (err, res) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(res)
+        }
+      })
+    })
   }
 }
 
