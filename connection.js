@@ -26,7 +26,7 @@ class Connection {
   }
 
   get(request) {
-     return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this.stub.Get(request, (err, res) => {
         if (err) {
           reject(err)
