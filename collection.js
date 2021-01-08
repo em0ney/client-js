@@ -3,6 +3,7 @@ const { v4: uuidv4, parse: parseUUID } = require('uuid')
 const Indexer = require('./indexer')
 const { DocumentEncryptor, DocumentDecryptor } = require('./document_encryptor')
 const QueryBuilder = require('./query_builder')
+const Mapping = require('./mapping')
 
 // Put this in a Util module
 function asBuffer(id) {
@@ -18,6 +19,13 @@ function asBuffer(id) {
 
 
 class Collection {
+  static from(spec) {
+    const {id, fields, cipherSuite} = spec
+    const mapping = Mapping.from(fields)
+
+    return new Collection(id, mapping, cipherSuite)
+  }
+
   constructor(uuidStr, mapping, cipherSuite) {
     this.id = parseUUID(uuidStr)
     this.mapping = mapping
