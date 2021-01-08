@@ -25,16 +25,23 @@ const UserMapping = new Mapping().setField('name', new Analysis.Keyword(0)).setF
 const User = new Collection(collectionId, UserMapping, cipher)
 //col.buildPutRequest({id: 100, name: "Dan Draper"}).then(console.log)
 
-Stash.connect('127.0.0.1:50051').then((conn) => {
+Stash.connect('127.0.0.1:50051').then(async (conn) => {
+  await conn.put(User, {id: 101, name: 'Lauren Neko', age: 35})
+  await conn.put(User, {id: 102, name: 'Mojito Neko-Draper', age: 6})
+
   conn.put(User, {id: 100, name: 'Dan Draper', age: 39}).then((a) => {
     conn.get(User, a).then((r) => { console.log("GET", r) })
 
     conn.all(new Query(User).where({name: "Dan Draper"})).then(console.log)
 
-    q2 = new Query(User).where((q) => {
-      return { age: q.gte(10) }
+    q2 = new Query(User).limit(10).where((q) => {
+      return { age: q.gte(2) }
     })
 
-    conn.all(q2).then((res) => { console.log("RANGE", res) })
+    console.log(q2)
+
+    //conn.all(User, q1)
+
+    conn.all(q2.limit(2)).then((res) => { console.log("RANGE", res) })
   })
 })

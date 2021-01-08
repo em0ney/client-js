@@ -48,6 +48,18 @@ describe('Query builder', () => {
   })
 })
 
+describe('Pagination', () => {
+  test('default limit', () => {
+    const q = new Query(null)
+    expect(q.recordLimit).toEqual(20)
+  })
+
+  test('explicit limit', () => {
+    const q = new Query(null).limit(17)
+    expect(q.recordLimit).toEqual(17)
+  })
+})
+
 describe('Query helpers', () => {
   test('EQ', () => {
     const q = new Query(null, (q) => {

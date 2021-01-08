@@ -1,5 +1,6 @@
 
 const QueryBuilder = require('./query_builder')
+const DEFAULT_LIMIT = 20
 
 // TODO: Move to its own file
 const Helpers = {
@@ -34,10 +35,18 @@ const Helpers = {
 
 class Query {
   constructor(collection, constraint = {}) {
+    // FIXME: DOes Query even need a collection?
     this.collection = collection
     this.constraints = []
     this.where(constraint)
-    this.limit = 20 // TODO: Make a function to set the limit and after
+    this.recordLimit = DEFAULT_LIMIT
+    // TODO: Implement after when its available in Stash
+    this.after = null
+  }
+
+  limit(number) {
+    this.recordLimit = number
+    return this
   }
 
   where(constraint) {
@@ -62,12 +71,8 @@ class Query {
     return {
       collectionId: this.collection.id,
       term: terms,
-      limit: this.limit
+      limit: this.recordLimit
     }
-  }
-
-  decrypt(ciphertext) {
-    return this.cipher.decrypt(ciphertext)
   }
 }
 
