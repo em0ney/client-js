@@ -33,6 +33,14 @@ const Helpers = {
 }
 
 class Query {
+  static from(queryable) {
+    if (queryable instanceof Query) {
+      return queryable
+    } else {
+      return new Query(queryable)
+    }
+  }
+
   constructor(constraint = {}) {
     this.constraints = []
     this.where(constraint)

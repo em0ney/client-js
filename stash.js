@@ -56,8 +56,7 @@ class Stash {
    *
    */
   async all(collection, queryable) {
-    // TODO put this in a static function on Query
-    const query = (queryable instanceof Query) ? queryable : new Query(queryable)
+    const query = Query.from(queryable)
     const request = await collection.buildQueryRequest(query)
 
     return this.#callGRPC('Query', request).then(({result}) => {
@@ -67,7 +66,6 @@ class Stash {
 
   async get(collection, id) {
     const request = collection.buildGetRequest(id)
-    // TODO: Try splitting this out (no need to use call or apply, just do foo())
     return this.#callGRPC('Get', request).then(({value}) => {
       return collection.handleResponse(value)
     })
