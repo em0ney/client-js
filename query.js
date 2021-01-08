@@ -1,5 +1,4 @@
 
-const QueryBuilder = require('./query_builder')
 const DEFAULT_LIMIT = 20
 
 // TODO: Move to its own file
@@ -34,9 +33,7 @@ const Helpers = {
 }
 
 class Query {
-  constructor(collection, constraint = {}) {
-    // FIXME: DOes Query even need a collection?
-    this.collection = collection
+  constructor(constraint = {}) {
     this.constraints = []
     this.where(constraint)
     this.recordLimit = DEFAULT_LIMIT
@@ -63,16 +60,6 @@ class Query {
       })
     }
     return this
-  }
-
-  async buildRequest() {
-    // FIXME: This is a bit leaky wrt the collection
-    const terms = await QueryBuilder(this, this.collection.mapping, this.collection.cipherSuite)
-    return {
-      collectionId: this.collection.id,
-      term: terms,
-      limit: this.recordLimit
-    }
   }
 }
 

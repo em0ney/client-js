@@ -32,16 +32,18 @@ Stash.connect('127.0.0.1:50051').then(async (conn) => {
   conn.put(User, {id: 100, name: 'Dan Draper', age: 39}).then((a) => {
     conn.get(User, a).then((r) => { console.log("GET", r) })
 
-    conn.all(new Query(User).where({name: "Dan Draper"})).then(console.log)
+    conn.all(User, new Query().where({name: "Dan Draper"})).then(console.log)
 
-    q2 = new Query(User).limit(10).where((q) => {
+    q2 = new Query().limit(10).where((q) => {
       return { age: q.gte(2) }
     })
 
-    console.log(q2)
+    conn.all(User, q2.limit(2)).then((res) => { console.log("RANGE", res) })
 
-    //conn.all(User, q1)
+    conn.all(User, {name: "Dan Draper"}).then((res) => { console.log('A', res) })
 
-    conn.all(q2.limit(2)).then((res) => { console.log("RANGE", res) })
+    conn.all(User, (q) => {
+      return {age: q.between(0, 100)}
+    }).then((res) => { console.log('B', res) })
   })
 })

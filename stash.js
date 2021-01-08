@@ -31,14 +31,33 @@ class Stash {
   }
 
   close() {
-    console.log("Closing")
     this.stub.close()
   }
 
-  async all(query) {
-    // TODO: Move the build to the connection
-    const { collection } = query
-    const request = await query.buildRequest()
+  /* Can be used in several ways:
+   *
+   * With a simple object constraint:
+   *
+   *     stash.all(User, {email: "name@example.com"})
+   *
+   * With a `Query` object:
+   *
+   *     const query = new Query({name: "Foo Bar"})
+   *     stash.all(User, query)
+   *
+   * With a function:
+   *
+   *     stash.all(User, (q) => {
+   *       return { age: q.gte(20) }
+   *     })
+   *
+   * Note that the default limit for the all function is 20.
+   * Use a `Query` to change the limit.
+   *
+   */
+  async all(collection, queryable) {
+    const query = (queryable instanceof Query) ? queryable : new Query(queryable)
+    const request = await collection.buildQueryRequest(query)
 
     return new Promise((resolve, reject) => {
       this.stub.Query(request, (err, res) => {

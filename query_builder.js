@@ -1,6 +1,8 @@
 
 // TODO: CipherSuite shouldn't be needed to build a query if we move ORE into the mapping
-const QueryBuilder = ({constraints}, mapping, cipherSuite) => {
+const QueryBuilder = (query, mapping, cipherSuite) => {
+  const {constraints} = query
+
   const cts = constraints.flatMap(([field, condition]) => {
     return mapping.query(field, condition);
   }).map(async (term) => {

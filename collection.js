@@ -2,6 +2,7 @@
 const { v4: uuidv4, parse: parseUUID } = require('uuid')
 const Indexer = require('./indexer')
 const { DocumentEncryptor, DocumentDecryptor } = require('./document_encryptor')
+const QueryBuilder = require('./query_builder')
 
 // Put this in a Util module
 function asBuffer(id) {
@@ -54,10 +55,15 @@ class Collection {
   }
 
   async buildQueryRequest(query) {
-    return QueryBuilder(query, this.mapping, this.cipherSuite)
+    // TODO: This should return an object containing limit, after and terms
+    const terms = await QueryBuilder(query, this.mapping, this.cipherSuite)
+    return {
+      collectionId: this.id,
+      term: terms,
+      limit: query.recordLimit
+    }
   }
 
-  // TODO: Sometimes the response has a key of value, and sometimes result - make it consistent
   async handleResponse(response) {
     return DocumentDecryptor(response, this.cipherSuite)
   }
