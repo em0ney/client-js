@@ -56,18 +56,11 @@ class Stash {
    *
    */
   async all(collection, queryable) {
+    // TODO put this in a static function on Query
     const query = (queryable instanceof Query) ? queryable : new Query(queryable)
     const request = await collection.buildQueryRequest(query)
 
-    return new Promise((resolve, reject) => {
-      this.stub.Query(request, (err, res) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(res)
-        }
-      })
-    }).then(({result}) => {
+    return this.#callGRPC('Query', request).then(({result}) => {
       return collection.handleResponse(result)
     })
   }
@@ -75,31 +68,27 @@ class Stash {
   async get(collection, id) {
     const request = collection.buildGetRequest(id)
     // TODO: Try splitting this out (no need to use call or apply, just do foo())
-    return new Promise((resolve, reject) => {
-      this.stub.Get(request, (err, res) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(res)
-        }
-      })
-    }).then(({value}) => {
+    return this.#callGRPC('Get', request).then(({value}) => {
       return collection.handleResponse(value)
     })
   }
 
   async put(collection, doc) {
     const request = await collection.buildPutRequest(doc)
+    return this.#callGRPC('Put', request).then((_ret) => {
+      return request.handle
+    })
+  }
+
+  #callGRPC(fun, request) {
     return new Promise((resolve, reject) => {
-      this.stub.Put(request, (err, res) => {
+      this.stub[fun](request, (err, res) => {
         if (err) {
           reject(err)
         } else {
           resolve(res)
         }
       })
-    }).then((_ret) => {
-      return request.handle
     })
   }
 }
