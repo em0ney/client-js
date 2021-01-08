@@ -1,6 +1,32 @@
-const Keyword = require('./analysis').Keyword
+const {Keyword, UInt, TypeAhead} = require('./analysis')
 
 class Mapping {
+  static from(fields) {
+    const mapping = new Mapping()
+    Object.entries(fields).forEach((entry) => {
+      const [name, settings] = entry
+      const {number, analyzer} = settings
+      mapping.setField(name, Mapping.analyzer(number, analyzer))
+    })
+    return mapping
+  }
+
+  static analyzer(fieldNumber, analyzer) {
+    switch(analyzer) {
+      case 'keyword':
+        return new Keyword(fieldNumber)
+
+      case 'uint':
+        return new UInt(fieldNumber)
+
+      case 'typeahead':
+        return new TypeAhead(fieldNumber)
+
+      default:
+        throw(`Unknown analyzer ${analyzer}`)
+    }
+  }
+
   constructor() {
     this.analyzers = {}
   }
