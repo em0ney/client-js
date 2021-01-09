@@ -3,11 +3,15 @@
   "version": "0.0.1",
   "description": "CipherStash client",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/cipherstash/cipherstash-js.git"
+  },
   "scripts": {
     "test": "jest"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Dan Draper",
+  "license": "SEE LICENSE IN LICENSE.md",
   "dependencies": {
     "@aws-crypto/client-node": "^2.0.0",
     "@cipherstash/ore": "0.0.2",
@@ -23,6 +27,7 @@
   },
   "files": [
     "*.js",
-    "dist/*"
+    "dist/*",
+    "analysis/*"
   ]
 }
