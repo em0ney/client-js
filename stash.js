@@ -62,26 +62,26 @@ class Stash {
     const query = Query.from(queryable)
     const request = await collection.buildQueryRequest(query)
 
-    return this.#callGRPC('Query', request).then(({result}) => {
+    return this.callGRPC('Query', request).then(({result}) => {
       return collection.handleResponse(result)
     })
   }
 
   async get(collection, id) {
     const request = collection.buildGetRequest(id)
-    return this.#callGRPC('Get', request).then(({value}) => {
+    return this.callGRPC('Get', request).then(({value}) => {
       return collection.handleResponse(value)
     })
   }
 
   async put(collection, doc) {
     const request = await collection.buildPutRequest(doc)
-    return this.#callGRPC('Put', request).then((_ret) => {
+    return this.callGRPC('Put', request).then((_ret) => {
       return request.handle
     })
   }
 
-  #callGRPC(fun, request) {
+  callGRPC(fun, request) {
     return new Promise((resolve, reject) => {
       this.stub[fun](request, (err, res) => {
         if (err) {
