@@ -2,11 +2,14 @@
 const gRPC = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 const Query = require('./query')
+const path = require('path')
+
+const PROTO_FILE = path.join(module.path, 'dist', 'stash.proto')
 
 const packageDefinition = protoLoader.loadSync(
-  "stash.proto", {
+  PROTO_FILE, {
     keepCase: true,
-    longs: String,
+    longs: Number,
     enums: String,
     defaults: true,
     oneofs: true
@@ -21,7 +24,7 @@ class Stash {
 
     return new Promise((resolve, reject) => {
       resolve(stash)
-    }) //TODO: How to close?.finally(() => stash.close())
+    })
   }
 
   // TODO: Don't use insecure creds
