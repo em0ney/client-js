@@ -32,7 +32,14 @@ class Mapping {
   }
 
   mapAll(record) {
-    // TODO
+    return Object.keys(this.analyzers).flatMap((field) => {
+      const value = record[field]
+      if (value) {
+        return this.map(field, value)
+      } else {
+        return []
+      }
+    })
   }
 
   map(field, value) {

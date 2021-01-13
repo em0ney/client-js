@@ -39,6 +39,35 @@ describe('Analyzer shortcuts', () => {
   })
 })
 
+describe('Map.all()', () => {
+  test('that the defined fields are mapped', () => {
+    const mapping = new Mapping()
+    mapping.setField('name', new Keyword(0))
+    mapping.setField('age', new UInt(1))
+
+    const result = mapping.mapAll({name: "Dan", age: 10})
+
+    expect(result).toHaveLength(2)
+    expect(result[0]).toEqual(Buffer.from([0, 232, 123, 45, 229, 158, 159, 115]))
+    expect(result[1]).toEqual(Buffer.from([1,   0,   0,  0,   0,   0,   0,  10]))
+  })
+
+  test('that ONLY the defined fields are mapped and other values are ignored', () => {
+    const mapping = new Mapping()
+    mapping.setField('name', new Keyword(0))
+    mapping.setField('age', new UInt(1))
+
+    const result = mapping.mapAll({name: "Dan", age: 10, foo: "Bar", x: 7})
+
+    expect(result).toHaveLength(2)
+    expect(result[0]).toEqual(Buffer.from([0, 232, 123, 45, 229, 158, 159, 115]))
+    expect(result[1]).toEqual(Buffer.from([1,   0,   0,  0,   0,   0,   0,  10]))
+  })
+
+
+  // TODO: Test a field with an analyzer that generates more than 1 term (flatmap)
+})
+
 describe('Mapping.from', () => {
   test('that the mapping is constructed correctly from a given definition', () => {
     const definition = {
