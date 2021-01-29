@@ -6,8 +6,8 @@ var credentials = new AWS.SharedIniFileCredentials({profile: 'dev'});
 AWS.config.credentials = credentials;
 
 async function run() {
-  const stash = await Stash.connect('127.0.0.1:50051')
-  await stash.put(User, {id: 101, name: 'Lauren Neko', age: 35})
+  const stash = await Stash.connect('127.0.0.1:50001')
+  await stash.put(User, {id: 101, name: 'Lauren Neko', age: 35, foo: "bar"})
   await stash.put(User, {id: 102, name: 'Mojito Neko-Draper', age: 6})
 
   // Using a promise
