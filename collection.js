@@ -35,7 +35,7 @@ class Collection {
   buildGetRequest(id) {
     return {
       collectionId: this.id,
-      handle: asBuffer(id)
+      id: asBuffer(id)
     };
   }
 
@@ -55,9 +55,9 @@ class Collection {
       return {
         collectionId: this.id,
         value: source,
-        handle: docId,
-        postingHandle: docId,
-        term: postings
+        id: docId,
+        posting: docId,
+        terms: postings
       }
     })
   }
@@ -67,7 +67,7 @@ class Collection {
     const terms = await QueryBuilder(query, this.mapping, this.cipherSuite)
     return {
       collectionId: this.id,
-      term: terms,
+      terms: terms,
       limit: query.recordLimit
     }
   }
