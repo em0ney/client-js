@@ -23,6 +23,10 @@ const EXPIRY_BUFFER = 20
 class AuthToken {
   /* 
    * Instantiates a new AuthToken.
+   * Tokens are cached up to just before they expire along with the data service for which
+   * they have been issued. This prevents a cached token being eroneously used for a new data server.
+   * Consequently, the AuthToken can manage tokens for multiple data services at once.
+   *
    * @param {string} idpHost is the hostname of the issuing Identity Provider
    * @param {object} creds is an object containing the `clientId` and `clientSecret`
    */
@@ -32,8 +36,7 @@ class AuthToken {
     this.data = {...DATA}
     this.data.client_id = creds.clientId
     this.data.client_secret = creds.clientSecret
-    this.token = null
-    this.expiresAt = 0
+    this.tokens = {}
   }
 
   /*
@@ -45,16 +48,22 @@ class AuthToken {
   async getToken(dataServer) {
     // Check if token is set and not expired
     // authenticate and return the token or just return the token
-    if (!this.tokenValid()) {
+    if (!this.tokenValid(dataServer)) {
       const {access_token, expires_in} = await this.authenticate(dataServer)
-      this.token = access_token
-      this.expiresAt = Math.trunc((new Date()).getTime() / 1000) + expires_in - EXPIRY_BUFFER
+      this.tokens[dataServer] = {
+        accessToken: access_token,
+        expiresAt: Math.trunc((new Date()).getTime() / 1000) + expires_in - EXPIRY_BUFFER
+      }
     }
-    return this.token
+    return this.tokens[dataServer]
   }
 
-  tokenValid() {
-    return !!this.token
+  /*
+   * Determines if we already have a valid auth token for the data
+   * server
+  * */
+  tokenValid(dataServer) {
+    return !!this.tokens[dataServer]
   }
 
   /*
