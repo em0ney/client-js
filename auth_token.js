@@ -55,7 +55,7 @@ class AuthToken {
         expiresAt: Math.trunc((new Date()).getTime() / 1000) + expires_in - EXPIRY_BUFFER
       }
     }
-    return this.tokens[dataServer]
+    return this.tokens[dataServer].accessToken
   }
 
   /*
