@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package stash;
+package stash.v1;
 
 service Documents {
   rpc put (PutRequest) returns (PutReply) {}

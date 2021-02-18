@@ -27,7 +27,7 @@ async function run() {
 
       stash.all(User, new Query().where({name: "Dan Draper"}))
       .then((results) => console.log("Results", results))
-      .catch((err) => console.error("Query error", err))*/
+      .catch((err) => console.error("Query error", err))
 
       q2 = new Query().limit(10).where((q) => {
         return { age: q.gte(2) }
