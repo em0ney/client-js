@@ -22,9 +22,10 @@ class Stash {
   /*
    * @param {string} host - dataService host to connect to
    * @param {AuthToken} auth - instance of an AuthToken
+   * @param {string} version - for forward compatibility (only v1 is valid right now)
    */
-  static connect(host, auth) {
-    const stash = new Stash(host, auth)
+  static connect(host, auth, version = "v1") {
+    const stash = new Stash(host, auth, version)
 
     return new Promise((resolve, reject) => {
       resolve(stash)
@@ -34,11 +35,13 @@ class Stash {
   /*
    * @param {string} host - the data service we are connecting to
    * @param {AuthToken} auth
+   * @param {string} version - for forward compatibility (only v1 is valid right now)
    */
-  constructor(host, auth) {
+  constructor(host, auth, version) {
+    if (version != "v1") throw "Invalid version"
   // TODO: Don't use insecure creds (i.e. use SSL)
     const creds = gRPC.credentials.createInsecure()
-    this.stub = new StashService.Documents(host, creds)
+    this.stub = new StashService[version].Documents(host, creds)
     this.host = host
     this.auth = auth
   }
