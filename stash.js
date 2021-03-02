@@ -24,12 +24,14 @@ class Stash {
    * @param {AuthToken} auth - instance of an AuthToken
    * @param {string} version - for forward compatibility (only v1 is valid right now)
    */
-  static connect(host, auth, version = "v1") {
+  static async connect(host, auth, version = "v1") {
     const stash = new Stash(host, auth, version)
 
-    return new Promise((resolve, reject) => {
-      resolve(stash)
-    })
+    /* Get a token at startup so that any federated identities
+     * (required for encryption) are ready */
+    await auth.getToken(host)
+
+    return stash
   }
 
   /*
@@ -96,6 +98,7 @@ class Stash {
 
   callGRPC(fun, requestBody) {
     return new Promise((resolve, reject) => {
+      /* Start by making sure we have a token */
       this.auth.getToken(this.host).then((authToken) => {
         const request = {
           context: { authToken },
