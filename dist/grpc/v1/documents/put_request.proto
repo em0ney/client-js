@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package stash.GRPC.V1.Documents;
+import "request_context.proto";
+
+message PutRequest {
+  bytes collectionId = 1;
+  bytes id = 2;
+  bytes value = 3;
+  bytes posting = 4;
+  repeated bytes terms = 5;
+
+  RequestContext context = 100;
+}
+

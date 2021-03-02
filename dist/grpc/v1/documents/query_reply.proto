@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package stash.GRPC.V1.Documents;
+
+message QueryReply {
+  repeated bytes result = 1;
+}
