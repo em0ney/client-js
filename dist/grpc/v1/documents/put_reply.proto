@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+package stash.GRPC.V1.Documents;
+
+message PutReply {
+}

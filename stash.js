@@ -1,22 +1,7 @@
 
-const gRPC = require('@grpc/grpc-js');
-const protoLoader = require('@grpc/proto-loader');
 const Query = require('./query')
 const path = require('path')
-
-const PROTO_FILE = path.join(module.path, 'dist', 'stash.proto')
-
-const packageDefinition = protoLoader.loadSync(
-  PROTO_FILE, {
-    keepCase: true,
-    longs: Number,
-    enums: String,
-    defaults: true,
-    oneofs: true
-  }
-);
-
-const StashService = gRPC.loadPackageDefinition(packageDefinition).stash;
+const GRPC = require('./grpc').V1
 
 class Stash {
   /*
@@ -24,12 +9,14 @@ class Stash {
    * @param {AuthToken} auth - instance of an AuthToken
    * @param {string} version - for forward compatibility (only v1 is valid right now)
    */
-  static connect(host, auth, version = "v1") {
+  static async connect(host, auth, version = "v1") {
     const stash = new Stash(host, auth, version)
 
-    return new Promise((resolve, reject) => {
-      resolve(stash)
-    })
+    /* Get a token at startup so that any federated identities
+     * (required for encryption) are ready */
+    await auth.getToken(host)
+
+    return stash
   }
 
   /*
@@ -38,10 +25,7 @@ class Stash {
    * @param {string} version - for forward compatibility (only v1 is valid right now)
    */
   constructor(host, auth, version) {
-    if (version != "v1") throw "Invalid version"
-  // TODO: Don't use insecure creds (i.e. use SSL)
-    const creds = gRPC.credentials.createInsecure()
-    this.stub = new StashService[version].Documents(host, creds)
+    this.stub = GRPC.API(host)
     this.host = host
     this.auth = auth
   }
@@ -96,6 +80,7 @@ class Stash {
 
   callGRPC(fun, requestBody) {
     return new Promise((resolve, reject) => {
+      /* Start by making sure we have a token */
       this.auth.getToken(this.host).then((authToken) => {
         const request = {
           context: { authToken },

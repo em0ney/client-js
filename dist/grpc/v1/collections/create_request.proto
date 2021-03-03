@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package stash.GRPC.V1.Collections;
+import "request_context.proto";
+
+message CreateRequest {
+  bytes ref = 1;
+
+  RequestContext context = 100;
+}

@@ -1,15 +1,15 @@
 const {AuthToken, Stash, Query} = require('@cipherstash/client')
 const User = require('./user')
 
-const AWS = require("aws-sdk")
-var credentials = new AWS.SharedIniFileCredentials({profile: 'dev'});
-AWS.config.credentials = credentials;
-
 const auth = new AuthToken({
   idpHost: process.env.CS_IDP_HOST,
   creds: {
     clientId: process.env.CS_CLIENT_ID,
     clientSecret: process.env.CS_SECRET
+  },
+  federation: {
+    IdentityPoolId: process.env.CS_FEDERATED_IDENTITY_ID,
+    region: 'ap-southeast-2'
   }
 })
 

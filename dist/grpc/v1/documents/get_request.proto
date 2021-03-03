@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package stash.GRPC.V1.Documents;
+import "request_context.proto";
+
+message GetRequest {
+  bytes collectionId = 1;
+  bytes id = 2;
+
+  RequestContext context = 100;
+}
+
+

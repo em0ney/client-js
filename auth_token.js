@@ -1,5 +1,6 @@
 const https = require('https')
 const querystring = require('querystring')
+const AWS = require("aws-sdk")
 
 const OPTS = {
   port: 443,
@@ -30,13 +31,15 @@ class AuthToken {
    * @param {string} idpHost is the hostname of the issuing Identity Provider
    * @param {object} creds is an object containing the `clientId` and `clientSecret`
    */
-  constructor({idpHost, creds}) {
+  constructor({idpHost, creds, federation}) {
+    this.idpHost = idpHost
     this.request = {...OPTS}
     this.request.host = idpHost
     this.data = {...DATA}
     this.data.client_id = creds.clientId
     this.data.client_secret = creds.clientSecret
     this.tokens = {}
+    this.federation = federation
   }
 
   /*
@@ -54,8 +57,33 @@ class AuthToken {
         accessToken: access_token,
         expiresAt: Math.trunc((new Date()).getTime() / 1000) + expires_in - EXPIRY_BUFFER
       }
+      /* Federate the token if configured */
+      this.federateToken(access_token)
     }
     return this.tokens[dataServer].accessToken
+  }
+
+  /*
+   * Federates the accessToken to any configfured identity pools.
+   * Only supports AWS (Cognito) right now.
+   *
+   * See https://docs.aws.amazon.com/cognito/latest/developerguide/open-id.html
+   */
+  federateToken(accessToken) {
+    if (this.federation) {
+      const { IdentityPoolId, region } = this.federation
+
+      AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: IdentityPoolId,
+        Logins: {
+          [this.idpHost]: accessToken
+        }
+      }, {region: region})
+
+      AWS.config.credentials.get((err) => {
+        if (err) throw(err)
+      })
+    }
   }
 
   /*
