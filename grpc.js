@@ -4,10 +4,10 @@ const protoLoader = require('@grpc/proto-loader')
 const path = require('path')
 
 const PROTO_BASE_PATH = path.join(module.path, 'dist', 'grpc')
-const PROTO_FILE = path.join(PROTO_BASE_PATH, 'v1', 'documents', 'api.proto')
+const API_PROTO_FILE = path.join(PROTO_BASE_PATH, 'v1', 'api.proto')
 
-const packageDefinition = protoLoader.loadSync(
-  PROTO_FILE, {
+const grpcDefinition = protoLoader.loadSync(
+  API_PROTO_FILE, {
     includeDirs: [path.join(PROTO_BASE_PATH, 'v1')],
     keepCase: true,
     longs: Number,
@@ -17,14 +17,14 @@ const packageDefinition = protoLoader.loadSync(
   }
 )
 
-const StashProto = gRPC.loadPackageDefinition(packageDefinition).stash
+const APIProto = gRPC.loadPackageDefinition(grpcDefinition).stash
 
 // TODO: Don't use insecure creds (i.e. use SSL)
 const gRPCCreds = gRPC.credentials.createInsecure()
 
 const V1 = {
-  Documents: function(host) {
-    return new StashProto.GRPC.V1.Documents.API(host, gRPCCreds)
+  API: function(host) {
+    return new APIProto.GRPC.V1.API(host, gRPCCreds)
   }
 }
 

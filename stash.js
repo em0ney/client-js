@@ -1,25 +1,6 @@
 
-const gRPC = require('@grpc/grpc-js');
-const protoLoader = require('@grpc/proto-loader');
 const Query = require('./query')
 const path = require('path')
-
-// TODO: Move all of this into its own file
-const PROTO_FILE = path.join(module.path, 'dist', 'grpc', 'v1', 'documents', 'api.proto')
-
-const packageDefinition = protoLoader.loadSync(
-  PROTO_FILE, {
-    includeDirs: [module.path + "/dist/grpc/v1"], // TODO: Use join
-    keepCase: true,
-    longs: Number,
-    enums: String,
-    defaults: true,
-    oneofs: true
-  }
-);
-
-//const StashService = gRPC.loadPackageDefinition(packageDefinition).stash.GRPC.V1;
-
 const GRPC = require('./grpc').V1
 
 class Stash {
@@ -44,7 +25,7 @@ class Stash {
    * @param {string} version - for forward compatibility (only v1 is valid right now)
    */
   constructor(host, auth, version) {
-    this.stub = GRPC.Documents(host)
+    this.stub = GRPC.API(host)
     this.host = host
     this.auth = auth
   }
