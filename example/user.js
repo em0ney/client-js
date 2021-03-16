@@ -16,4 +16,4 @@ const User = {
 }
 
 // TODO: Rename from to for?
-module.exports = Collection.from(User)
+//module.exports = Collection.from(User)

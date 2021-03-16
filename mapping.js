@@ -1,13 +1,14 @@
 const {Keyword, UInt, TypeAhead} = require('./analysis')
 
 class Mapping {
-  static from(fields) {
+  static from(indexes) {
     const mapping = new Mapping()
-    Object.entries(fields).forEach((entry) => {
-      const [name, settings] = entry
-      const {number, analyzer} = settings
-      mapping.setField(name, Mapping.analyzer(number, analyzer))
+
+    indexes.forEach(({id, settings, field_id: fieldId}) => {
+      const {name, analyzer, key: fieldKey} = settings 
+      mapping.setField(name, Mapping.analyzer(fieldId, analyzer), fieldKey)
     })
+
     return mapping
   }
 
@@ -52,8 +53,8 @@ class Mapping {
     return this.getField(field).performForQuery(predicate, value)
   }
 
-  setField(field, analyzer) {
-    this.analyzers[field] = analyzer
+  setField(field, analyzer, fieldKey) {
+    this.analyzers[field] = { analyzer, fieldKey }
     return this
   }
 

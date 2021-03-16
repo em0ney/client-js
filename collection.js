@@ -57,10 +57,10 @@ class Collection {
     return new Collection(id, decryptedIndexes, grpcStub, cipherSuite)
   }
 
-  constructor(id, mapping, grpcStub, cipherSuite) {
+  constructor(id, indexes, grpcStub, cipherSuite) {
     this.id = id
     this.grpcStub = grpcStub
-    this.mapping = mapping
+    this.mapping = Mapping.from(indexes)
     this.cipherSuite = cipherSuite
   }
 
