@@ -18,6 +18,7 @@ const grpcDefinition = protoLoader.loadSync(
 )
 
 const APIProto = gRPC.loadPackageDefinition(grpcDefinition).stash
+console.log(APIProto.GRPC.V1.API.service.AddIndex)
 
 // TODO: Don't use insecure creds (i.e. use SSL)
 const gRPCCreds = gRPC.credentials.createInsecure()

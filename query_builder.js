@@ -3,6 +3,10 @@
 const QueryBuilder = (query, mapping, cipherSuite) => {
   const {constraints} = query
 
+  /* There is a simple query protocol used for the Stash Data Service
+   * Terms starting with a `0` byte mean a single equality match to a single term
+   * while terms starting a `1` byte mean a range query containing a min and max term.
+   */
   const cts = constraints.flatMap(([field, condition]) => {
     return mapping.query(field, condition);
   }).map(async (term) => {

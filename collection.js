@@ -4,6 +4,8 @@ const Indexer = require('./indexer')
 const { DocumentEncryptor, DocumentDecryptor } = require('./document_encryptor')
 const QueryBuilder = require('./query_builder')
 const Mapping = require('./mapping')
+const Secrets = require('./secrets')
+const crypto = require('crypto')
 
 // Put this in a Util module
 function asBuffer(id) {
@@ -26,17 +28,89 @@ class Collection {
     return new Collection(id, mapping, cipherSuite)
   }
 
-  constructor(uuidStr, mapping, cipherSuite) {
-    this.id = parseUUID(uuidStr)
+  static async load(name, grpcStub, auth, cipherSuite) {
+    this.grpcStub = grpcStub
+    this.cipherSuite = cipherSuite
+
+    // FIXME: Don't hard-code the secret ID!
+    const clusterKey = await Secrets.getSecret("cs-cluster-secret-0000")
+    console.log("clusterKey", clusterKey)
+    const clusterKeyBin = Buffer.from(clusterKey, "base64")
+     
+    // TODO: We should B64 decode the cluster key (or later only deal with binary)
+
+    const hmac = crypto.createHmac('sha256', clusterKeyBin)
+    hmac.update("users")
+    const ref = hmac.digest()
+    console.log("REF", ref)
+    const request = { ref: ref }
+    const {id, indexes} = await Collection.callGRPC('collectionInfo', grpcStub, auth, request)
+
+    const decryptedIndexes = await Promise.all(indexes.map(async index => {
+      const {settings} = index
+
+      return Object.assign(index, {
+        settings: await cipherSuite.decrypt(settings)
+      })
+    }))
+
+    return new Collection(id, decryptedIndexes, grpcStub, cipherSuite)
+  }
+
+  constructor(id, mapping, grpcStub, cipherSuite) {
+    this.id = id
+    this.grpcStub = grpcStub
     this.mapping = mapping
     this.cipherSuite = cipherSuite
+  }
+
+  async get(id) {
+    const request = this.buildGetRequest(id)
+    const response = await this.callGRPC('get', request)
+    return this.handleResponse(response)
+  }
+
+  async put(collection, doc) {
+    const request = await collection.buildPutRequest(doc)
+    // TODO: Read the ID from the response
+    const _response = await this.callGRPC('put', request)
+    return request.id
+  }
+
+  /* Can be used in several ways:
+   *
+   * @example With a simple object constraint:
+   *
+   *     stash.all(User, {email: "name@example.com"})
+   *
+   * @example With a `Query` object:
+   *
+   *     const query = new Query({name: "Foo Bar"})
+   *     stash.all(User, query)
+   *
+   * @example With a function:
+   *
+   *     stash.all(User, (q) => {
+   *       return { age: q.gte(20) }
+   *     })
+   *
+   * Note that the default limit for the all function is 20.
+   * Use a `Query` to change the limit.
+   *
+   */
+  async all(collection, queryable) {
+    const query = Query.from(queryable)
+    const request = await collection.buildQueryRequest(query)
+
+    const { result } = await this.callGRPC('query', request)
+    return collection.handleResponse(result)
   }
 
   buildGetRequest(id) {
     return {
       collectionId: this.id,
       id: asBuffer(id)
-    };
+    }
   }
 
   async buildPutRequest(doc) {
@@ -47,19 +121,19 @@ class Collection {
       docId = asBuffer(doc.id);
     }
 
-    return Promise.all([
+    const data = await Promise.all([
       Indexer(doc, this.mapping, this.cipherSuite),
       DocumentEncryptor(doc, this.cipherSuite)
-    ]).then((data) => {
-      const [postings, source] = data
-      return {
-        collectionId: this.id,
-        value: source,
-        id: docId,
-        posting: docId,
-        terms: postings
-      }
-    })
+    ])
+    const [postings, source] = data
+
+    return {
+      collectionId: this.id,
+      value: source,
+      id: docId,
+      posting: docId,
+      terms: postings
+    }
   }
 
   async buildQueryRequest(query) {
@@ -74,6 +148,29 @@ class Collection {
 
   async handleResponse(response) {
     return DocumentDecryptor(response, this.cipherSuite)
+  }
+
+  static callGRPC(fun, stub, auth, requestBody) {
+    return new Promise((resolve, reject) => {
+      /* Start by making sure we have a token */
+      // FIXME: Don't pass the host to getToken
+      auth.getToken('localhost:50001').then((authToken) => {
+        const request = {
+          context: { authToken },
+          ...requestBody
+        }
+
+        stub[fun](request, (err, res) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(res)
+          }
+        })
+      }).catch((err) => {
+        reject(err)
+      })
+    })
   }
 }
 

@@ -11,14 +11,20 @@ import "documents/query_reply.proto";
 import "collections/create_request.proto";
 import "collections/info_request.proto";
 import "collections/info_reply.proto";
+import "indexes/add_request.proto";
+import "indexes/add_reply.proto";
 
 service API {
   rpc put (Documents.PutRequest) returns (Documents.PutReply) {}
   rpc get (Documents.GetRequest) returns (Documents.GetReply) {}
   rpc query (Documents.QueryRequest) returns (Documents.QueryReply) {}
 
+// TODO: Give these capital first letters
   rpc createCollection (Collections.CreateRequest) returns (Collections.InfoReply) {}
   rpc collectionInfo (Collections.InfoRequest) returns (Collections.InfoReply) {}
+
+  rpc AddIndex(Indexes.AddRequest) returns (Indexes.AddReply) {}
+//  rpc DeleteIndex(Indexes.DeleteRequest) returns (Indexes.DeleteReply) {}
 }
 
 
