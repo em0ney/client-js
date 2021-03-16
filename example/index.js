@@ -20,7 +20,8 @@ async function run() {
 
     const users = await stash.collection("users")
     console.log(users.mapping)
-    //users.put(...)
+
+    users.put({id: 101, name: "Lauren Neko", age: 35})
 
     // TODO: Load the settings from the server
     /*await stash.put(User, {id: 101, name: 'Lauren Neko', age: 35, foo: "bar"})

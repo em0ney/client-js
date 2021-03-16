@@ -1,4 +1,5 @@
 const {Keyword, UInt, TypeAhead} = require('./analysis')
+const ORE = require('@cipherstash/ore')
 
 class Mapping {
   static from(indexes) {
@@ -44,7 +45,15 @@ class Mapping {
   }
 
   map(field, value) {
-    return this.getField(field).perform(value)
+    const {analyzer, fieldKey} = this.getField(field)
+    const termBuffer = analyzer.perform(value)
+    console.log("FK", fieldKey)
+    // FIXME: Just keep the 2 keys (prf/prp) as separate fields within the settings (in stash)
+    // TODO: Probably should have a format version for the field settings as well
+    const fieldKeyBuffer = Buffer.from(fieldKey, 'hex')
+    console.log("PRFKEY", fieldKeyBuffer.slice(0, 16))
+    const ore = new ORE(fieldKeyBuffer.slice(0, 16), fieldKeyBuffer.slice(16, 32))
+    return ore.encrypt(termBuffer.readBigUint64BE())
   }
 
   // Handle single or an array of conditions

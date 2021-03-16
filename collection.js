@@ -44,6 +44,7 @@ class Collection {
     const ref = hmac.digest()
     console.log("REF", ref)
     const request = { ref: ref }
+    // TODO: Consolidate grpcStub, auth and hostname into one class
     const {id, indexes} = await Collection.callGRPC('collectionInfo', grpcStub, auth, request)
 
     const decryptedIndexes = await Promise.all(indexes.map(async index => {
@@ -54,12 +55,13 @@ class Collection {
       })
     }))
 
-    return new Collection(id, decryptedIndexes, grpcStub, cipherSuite)
+    return new Collection(id, decryptedIndexes, grpcStub, auth, cipherSuite)
   }
 
-  constructor(id, indexes, grpcStub, cipherSuite) {
+  constructor(id, indexes, grpcStub, auth, cipherSuite) {
     this.id = id
     this.grpcStub = grpcStub
+    this.auth = auth
     this.mapping = Mapping.from(indexes)
     this.cipherSuite = cipherSuite
   }
@@ -70,10 +72,10 @@ class Collection {
     return this.handleResponse(response)
   }
 
-  async put(collection, doc) {
-    const request = await collection.buildPutRequest(doc)
+  async put(doc) {
+    const request = await this.buildPutRequest(doc)
     // TODO: Read the ID from the response
-    const _response = await this.callGRPC('put', request)
+    const _response = await Collection.callGRPC('put', this.grpcStub, this.auth, request)
     return request.id
   }
 
@@ -98,9 +100,9 @@ class Collection {
    * Use a `Query` to change the limit.
    *
    */
-  async all(collection, queryable) {
+  async all(queryable) {
     const query = Query.from(queryable)
-    const request = await collection.buildQueryRequest(query)
+    const request = await this.buildQueryRequest(query)
 
     const { result } = await this.callGRPC('query', request)
     return collection.handleResponse(result)
@@ -114,6 +116,7 @@ class Collection {
   }
 
   async buildPutRequest(doc) {
+    console.log("BUILD PUT REQ", doc)
     // TODO Put into a utility function
     let docId = uuidv4({}, Buffer.alloc(16));
 
