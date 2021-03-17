@@ -19,11 +19,9 @@ async function run() {
     const stash = await Stash.connect('localhost:50001', auth, cmk)
 
     const users = await stash.collection("users")
-    console.log(users.mapping)
 
     await users.put({id: 101, name: "Lauren Neko", age: 35})
     const lauren = await users.get(101)
-    console.log("WIFEY", lauren)
 
 
     q2 = new Query().limit(10).where((q) => {
@@ -31,7 +29,6 @@ async function run() {
     })
 
     const results = await users.all(q2.limit(2))
-    console.log("QUERY", results)
 
     /*await stash.put(User, {id: 101, name: 'Lauren Neko', age: 35, foo: "bar"})
     await stash.put(User, {id: 102, name: 'Mojito Neko-Draper', age: 6})
@@ -53,7 +50,7 @@ async function run() {
       stash.all(User, q2.limit(2))
       .then((res) => { console.log("RANGE", res) })
       .catch((err) => console.error("Query error", err))*/
-      
+
       /* Example query using await */
       /*const results = await stash.all(User, (q) => {
         return {age: q.between(0, 100)}

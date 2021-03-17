@@ -35,15 +35,13 @@ class Collection {
 
     // FIXME: Don't hard-code the secret ID!
     const clusterKey = await Secrets.getSecret("cs-cluster-secret-0000")
-    console.log("clusterKey", clusterKey)
     const clusterKeyBin = Buffer.from(clusterKey, "base64")
-     
+
     // TODO: We should B64 decode the cluster key (or later only deal with binary)
 
     const hmac = crypto.createHmac('sha256', clusterKeyBin)
     hmac.update("users")
     const ref = hmac.digest()
-    console.log("REF", ref)
     const request = { ref: ref }
     // TODO: Consolidate grpcStub, auth and hostname into one class
     const {id, indexes} = await Collection.callGRPC('collectionInfo', grpcStub, auth, request)
