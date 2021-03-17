@@ -6,6 +6,7 @@ const QueryBuilder = require('./query_builder')
 const Mapping = require('./mapping')
 const Secrets = require('./secrets')
 const crypto = require('crypto')
+const Query = require('./query')
 
 // Put this in a Util module
 function asBuffer(id) {
@@ -68,8 +69,8 @@ class Collection {
 
   async get(id) {
     const request = this.buildGetRequest(id)
-    const response = await this.callGRPC('get', request)
-    return this.handleResponse(response)
+    const { value } = await Collection.callGRPC('get', this.grpcStub, this.auth, request)
+    return this.handleResponse(value)
   }
 
   async put(doc) {
@@ -104,8 +105,8 @@ class Collection {
     const query = Query.from(queryable)
     const request = await this.buildQueryRequest(query)
 
-    const { result } = await this.callGRPC('query', request)
-    return collection.handleResponse(result)
+    const { result } = await Collection.callGRPC('query', this.grpcStub, this.auth, request)
+    return this.handleResponse(result)
   }
 
   buildGetRequest(id) {
@@ -139,13 +140,15 @@ class Collection {
     }
   }
 
-  async buildQueryRequest(query) {
+  async buildQueryRequest({constraints, recordLimit}) {
     // TODO: This should return an object containing limit, after and terms
-    const terms = await QueryBuilder(query, this.mapping, this.cipherSuite)
+    const terms = constraints.flatMap(([field, condition]) => {
+      return this.mapping.query(field, condition)
+    })
     return {
       collectionId: this.id,
       terms: terms,
-      limit: query.recordLimit
+      limit: recordLimit
     }
   }
 

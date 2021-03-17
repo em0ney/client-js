@@ -1,5 +1,5 @@
 
-// TODO: CipherSuite shouldn't be needed to build a query if we move ORE into the mapping
+// TODO: Deprecated - this can be removed
 const QueryBuilder = (query, mapping, cipherSuite) => {
   const {constraints} = query
 

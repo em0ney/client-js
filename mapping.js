@@ -53,13 +53,39 @@ class Mapping {
     const fieldKeyBuffer = Buffer.from(fieldKey, 'hex')
     console.log("PRFKEY", fieldKeyBuffer.slice(0, 16))
     const ore = new ORE(fieldKeyBuffer.slice(0, 16), fieldKeyBuffer.slice(16, 32))
+
     return ore.encrypt(termBuffer.readBigUint64BE())
   }
 
   // Handle single or an array of conditions
   query(field, condition) {
     const [predicate, value] = condition
-    return this.getField(field).performForQuery(predicate, value)
+
+    const {analyzer, fieldKey} = this.getField(field)
+    const fieldKeyBuffer = Buffer.from(fieldKey, 'hex')
+    const ore = new ORE(fieldKeyBuffer.slice(0, 16), fieldKeyBuffer.slice(16, 32))
+    
+    // FIXME: performForQuery should return either a term or a "tuple" (not a single element array)
+    const [term] = analyzer.performForQuery(predicate, value)
+
+    if (term instanceof Array && term.length == 2) {
+      const [min, max] = term;
+      const {left: minL, right: minR} = ore.encrypt(min.readBigUint64BE())
+      const {left: maxL, right: maxR} = ore.encrypt(max.readBigUint64BE())
+
+      // TODO: Use a constant instead of magic number
+      return Buffer.concat([
+        Buffer.from([1]),
+        minL,
+        minR,
+        maxL,
+        maxR
+      ])
+    } else {
+      const {left: left, right: right} = ore.encrypt(term.readBigUint64BE())
+      // TODO: Use a constant instead of magic number
+      return Buffer.concat([Buffer.from([0]), left, right])
+    }
   }
 
   setField(field, analyzer, fieldKey) {

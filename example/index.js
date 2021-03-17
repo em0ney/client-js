@@ -21,9 +21,18 @@ async function run() {
     const users = await stash.collection("users")
     console.log(users.mapping)
 
-    users.put({id: 101, name: "Lauren Neko", age: 35})
+    await users.put({id: 101, name: "Lauren Neko", age: 35})
+    const lauren = await users.get(101)
+    console.log("WIFEY", lauren)
 
-    // TODO: Load the settings from the server
+
+    q2 = new Query().limit(10).where((q) => {
+      return { age: q.gte(2) }
+    })
+
+    const results = await users.all(q2.limit(2))
+    console.log("QUERY", results)
+
     /*await stash.put(User, {id: 101, name: 'Lauren Neko', age: 35, foo: "bar"})
     await stash.put(User, {id: 102, name: 'Mojito Neko-Draper', age: 6})
 
