@@ -117,7 +117,6 @@ class Collection {
   }
 
   async buildPutRequest(doc) {
-    console.log("BUILD PUT REQ", doc)
     // TODO Put into a utility function
     let docId = uuidv4({}, Buffer.alloc(16));
 
@@ -126,7 +125,7 @@ class Collection {
     }
 
     const data = await Promise.all([
-      Indexer(doc, this.mapping, this.cipherSuite),
+      Indexer(doc, this.mapping),
       DocumentEncryptor(doc, this.cipherSuite)
     ])
     const [postings, source] = data

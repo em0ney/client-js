@@ -2,17 +2,6 @@ const {Keyword, UInt, TypeAhead} = require('./analysis')
 const ORE = require('@cipherstash/ore')
 
 class Mapping {
-  static from(indexes) {
-    const mapping = new Mapping()
-
-    indexes.forEach(({id, settings, field_id: fieldId}) => {
-      const {name, analyzer, key: fieldKey} = settings 
-      mapping.setField(name, Mapping.analyzer(fieldId, analyzer), fieldKey)
-    })
-
-    return mapping
-  }
-
   static analyzer(fieldNumber, analyzer) {
     switch(analyzer) {
       case 'keyword':
@@ -29,6 +18,8 @@ class Mapping {
     }
   }
 
+  // TODO: Pass all field settings to the constructor
+  // so it is usable once constructed
   constructor() {
     this.analyzers = {}
   }
@@ -47,11 +38,9 @@ class Mapping {
   map(field, value) {
     const {analyzer, fieldKey} = this.getField(field)
     const termBuffer = analyzer.perform(value)
-    console.log("FK", fieldKey)
     // FIXME: Just keep the 2 keys (prf/prp) as separate fields within the settings (in stash)
     // TODO: Probably should have a format version for the field settings as well
     const fieldKeyBuffer = Buffer.from(fieldKey, 'hex')
-    console.log("PRFKEY", fieldKeyBuffer.slice(0, 16))
     const ore = new ORE(fieldKeyBuffer.slice(0, 16), fieldKeyBuffer.slice(16, 32))
 
     return ore.encrypt(termBuffer.readBigUint64BE())

@@ -19,6 +19,6 @@ describe('query analysis', () => {
     const kw = new Keyword(115);
     const result = kw.performForQuery("==", "foo@example.com");
 
-    expect(result).toEqual(Buffer.from([115, 144,133,186,168,85, 203, 159]))
+    expect(result).toEqual([Buffer.from([115, 144,133,186,168,85, 203, 159])])
   });
 });

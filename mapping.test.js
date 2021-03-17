@@ -6,17 +6,14 @@ test('get field with no analyzer set', () => {
   expect(() => mapping.getField('city')).toThrow(/Field 'city' not defined/)
 })
 
-test('set and get field and analyzer', () => {
+test('set and get field settings', () => {
   const mapping = new Mapping()
-  mapping.setField('city', Keyword)
-  expect(mapping.getField('city')).toEqual(Keyword)
-})
-
-test('mapping a field analyzes it using the assigned analyzer', () => {
-  const mapping = new Mapping()
-  const analyzer = new Keyword(1)
-  mapping.setField('city', new Keyword(1))
-  expect(mapping.map('city', 'Sydney')).toEqual(analyzer.perform('Sydney'))
+  const fieldKeyCity = "c55f5b0221336878fe4b9a63e2fa89d73956c6492a40c53b312254f85ed4e209"
+  const fieldKeyAge = "ef135cf590e5bac75451d3f512d9f80eaf65a4198663c5fc57ffb264c6ed0eee"
+  mapping.setField('city', Keyword, fieldKeyCity)
+  mapping.setField('age', UInt, fieldKeyAge)
+  expect(mapping.getField('city')).toEqual({analyzer: Keyword, fieldKey: fieldKeyCity})
+  expect(mapping.getField('age')).toEqual({analyzer: UInt, fieldKey: fieldKeyAge})
 })
 
 describe('Analyzer shortcuts', () => {
@@ -42,43 +39,32 @@ describe('Analyzer shortcuts', () => {
 describe('Map.all()', () => {
   test('that the defined fields are mapped', () => {
     const mapping = new Mapping()
-    mapping.setField('name', new Keyword(0))
-    mapping.setField('age', new UInt(1))
-
+    const fieldKeyName = "c55f5b0221336878fe4b9a63e2fa89d73956c6492a40c53b312254f85ed4e209"
+    const fieldKeyAge = "ef135cf590e5bac75451d3f512d9f80eaf65a4198663c5fc57ffb264c6ed0eee"
+    mapping.setField('name', new Keyword(0), fieldKeyName)
+    mapping.setField('age', new UInt(1), fieldKeyAge)
     const result = mapping.mapAll({name: "Dan", age: 10})
 
+    // TODO: We really should use ORE compare to check that the terms
+    // have been generated correctly (but that requires `node-ore` to have compare
+    // implemented)
     expect(result).toHaveLength(2)
-    expect(result[0]).toEqual(Buffer.from([0, 232, 123, 45, 229, 158, 159, 115]))
-    expect(result[1]).toEqual(Buffer.from([1,   0,   0,  0,   0,   0,   0,  10]))
   })
 
   test('that ONLY the defined fields are mapped and other values are ignored', () => {
     const mapping = new Mapping()
-    mapping.setField('name', new Keyword(0))
-    mapping.setField('age', new UInt(1))
+    const fieldKeyName = "c55f5b0221336878fe4b9a63e2fa89d73956c6492a40c53b312254f85ed4e209"
+    const fieldKeyAge = "ef135cf590e5bac75451d3f512d9f80eaf65a4198663c5fc57ffb264c6ed0eee"
+    mapping.setField('name', new Keyword(0), fieldKeyName)
+    mapping.setField('age', new UInt(1), fieldKeyAge)
 
     const result = mapping.mapAll({name: "Dan", age: 10, foo: "Bar", x: 7})
 
     expect(result).toHaveLength(2)
-    expect(result[0]).toEqual(Buffer.from([0, 232, 123, 45, 229, 158, 159, 115]))
-    expect(result[1]).toEqual(Buffer.from([1,   0,   0,  0,   0,   0,   0,  10]))
+    // TODO: ORE should be checked (see above)
   })
 
 
   // TODO: Test a field with an analyzer that generates more than 1 term (flatmap)
 })
 
-describe('Mapping.from', () => {
-  test('that the mapping is constructed correctly from a given definition', () => {
-    const definition = {
-      name: {number: 0, analyzer: "typeahead"},
-      age: {number: 1, analyzer: "uint"}
-    }
-
-    const mapping = Mapping.from(definition)
-    expect(mapping.analyzers['name']).toBeInstanceOf(TypeAhead)
-    expect(mapping.analyzers['name'].field).toEqual(0)
-    expect(mapping.analyzers['age']).toBeInstanceOf(UInt)
-    expect(mapping.analyzers['age'].field).toEqual(1)
-  })
-})
