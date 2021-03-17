@@ -18,10 +18,20 @@ class Mapping {
     }
   }
 
-  // TODO: Pass all field settings to the constructor
-  // so it is usable once constructed
-  constructor() {
+  /*
+    fieldMappings is an object shaped like this:
+    {
+      0: { name: "email", analyzer: __, fieldKey: _},
+      1: { name: "age", analyzer: __, fieldKey: _},
+    }
+  */
+  constructor(fieldMappings) {
     this.analyzers = {}
+    // TODO: `fieldNumber`is a string encoding of an integer right now but will be a UUID soon
+    // There is lower level code that depends on it being an integer right now.
+    Object.entries(fieldMappings).forEach(([fieldNumber, {name, analyzer, fieldKey}]) => {
+      this.analyzers[name] = { analyzer: Mapping.analyzer(fieldNumber, analyzer), fieldKey }
+    })
   }
 
   mapAll(record) {
@@ -53,7 +63,7 @@ class Mapping {
     const {analyzer, fieldKey} = this.getField(field)
     const fieldKeyBuffer = Buffer.from(fieldKey, 'hex')
     const ore = new ORE(fieldKeyBuffer.slice(0, 16), fieldKeyBuffer.slice(16, 32))
-    
+
     // FIXME: performForQuery should return either a term or a "tuple" (not a single element array)
     const [term] = analyzer.performForQuery(predicate, value)
 
