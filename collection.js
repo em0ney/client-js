@@ -37,34 +37,19 @@ class Collection {
     const clusterKey = await Secrets.getSecret("cs-cluster-secret-0000")
     const clusterKeyBin = Buffer.from(clusterKey, "base64")
 
-    // TODO: We should B64 decode the cluster key (or later only deal with binary)
-
     const hmac = crypto.createHmac('sha256', clusterKeyBin)
     hmac.update("users")
     const ref = hmac.digest()
     const request = { ref: ref }
     // TODO: Consolidate grpcStub, auth and hostname into one class
     const {id, indexes} = await Collection.callGRPC('collectionInfo', grpcStub, auth, request)
-    console.log("INDEXES 1", indexes)
 
-    const decryptedIndexes = await Promise.all(new Array(indexes).reduce(async (acc, index) => {
+    const decryptedIndexes  = await indexes.reduce(async (acc, index) => {
       const {settings, field_id: fieldId} = index
       const plaintextSettings = await cipherSuite.decrypt(settings)
 
-      return Object.assign(acc, { [fieldId]: plaintextSettings })
-    }, {}))
-
-    console.log("NEW INDEXES", decryptedIndexes)
-
-    /*const decryptedIndexes = await Promise.all(indexes.map(async index => {
-      const {settings, field_id: fieldId} = index
-
-      return {
-
-      return Object.assign(index, {
-        settings: await cipherSuite.decrypt(settings)
-        })
-    }*/
+      return Object.assign(await acc, { [fieldId]: plaintextSettings })
+    }, Promise.resolve({}))
 
     return new Collection(id, decryptedIndexes, grpcStub, auth, cipherSuite)
   }
