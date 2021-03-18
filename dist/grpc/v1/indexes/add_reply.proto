@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package stash.GRPC.V1.Indexes;
+
+message AddReply {
+  bytes id = 1;
+}

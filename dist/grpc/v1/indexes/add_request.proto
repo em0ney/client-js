@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package stash.GRPC.V1.Indexes;
+import "request_context.proto";
+import "indexes/index.proto";
+
+message AddRequest {
+  bytes collectionId = 1;
+  Index index = 2;
+
+  RequestContext context = 100;
+}
