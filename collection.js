@@ -45,23 +45,36 @@ class Collection {
     const request = { ref: ref }
     // TODO: Consolidate grpcStub, auth and hostname into one class
     const {id, indexes} = await Collection.callGRPC('collectionInfo', grpcStub, auth, request)
+    console.log("INDEXES 1", indexes)
 
-    const decryptedIndexes = await Promise.all(indexes.map(async index => {
-      const {settings} = index
+    const decryptedIndexes = await Promise.all(new Array(indexes).reduce(async (acc, index) => {
+      const {settings, field_id: fieldId} = index
+      const plaintextSettings = await cipherSuite.decrypt(settings)
+
+      return Object.assign(acc, { [fieldId]: plaintextSettings })
+    }, {}))
+
+    console.log("NEW INDEXES", decryptedIndexes)
+
+    /*const decryptedIndexes = await Promise.all(indexes.map(async index => {
+      const {settings, field_id: fieldId} = index
+
+      return {
 
       return Object.assign(index, {
         settings: await cipherSuite.decrypt(settings)
-      })
-    }))
+        })
+    }*/
 
     return new Collection(id, decryptedIndexes, grpcStub, auth, cipherSuite)
   }
 
   constructor(id, indexes, grpcStub, auth, cipherSuite) {
+    console.log(indexes)
     this.id = id
     this.grpcStub = grpcStub
     this.auth = auth
-    this.mapping = Mapping.from(indexes)
+    this.mapping = new Mapping(indexes)
     this.cipherSuite = cipherSuite
   }
 
