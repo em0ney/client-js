@@ -5,8 +5,8 @@ const fieldKeyCity = "c55f5b0221336878fe4b9a63e2fa89d73956c6492a40c53b312254f85e
 const fieldKeyAge = "ef135cf590e5bac75451d3f512d9f80eaf65a4198663c5fc57ffb264c6ed0eee"
 
 const cityAndAgeMapper = new Mapping({
-  0: { name: 'city', analyzer: 'keyword', fieldKey: fieldKeyCity },
-  1: { name: 'age', analyzer: 'uint', fieldKey: fieldKeyAge },
+  0: { name: 'city', analyzer: 'keyword', key: fieldKeyCity },
+  1: { name: 'age', analyzer: 'uint', key: fieldKeyAge },
 })
 
 test('get field with no analyzer set', () => {
@@ -15,8 +15,8 @@ test('get field with no analyzer set', () => {
 })
 
 test('set and get field settings', () => {
-  expect(cityAndAgeMapper.getField('city')).toEqual({analyzer: new Keyword('0'), fieldKey: fieldKeyCity})
-  expect(cityAndAgeMapper.getField('age')).toEqual({analyzer: new UInt('1'), fieldKey: fieldKeyAge})
+  expect(cityAndAgeMapper.getField('city')).toEqual({analyzer: new Keyword('0'), key: fieldKeyCity})
+  expect(cityAndAgeMapper.getField('age')).toEqual({analyzer: new UInt('1'), key: fieldKeyAge})
 })
 
 describe('Analyzer shortcuts', () => {

@@ -21,16 +21,16 @@ class Mapping {
   /*
     fieldMappings is an object shaped like this:
     {
-      0: { name: "email", analyzer: __, fieldKey: _},
-      1: { name: "age", analyzer: __, fieldKey: _},
+      0: { name: "email", analyzer: __, key: _},
+      1: { name: "age", analyzer: __, key: _},
     }
   */
   constructor(fieldMappings) {
     this.analyzers = {}
     // TODO: `fieldNumber`is a string encoding of an integer right now but will be a UUID soon
     // There is lower level code that depends on it being an integer right now.
-    Object.entries(fieldMappings).forEach(([fieldNumber, {name, analyzer, fieldKey}]) => {
-      this.analyzers[name] = { analyzer: Mapping.analyzer(fieldNumber, analyzer), fieldKey }
+    Object.entries(fieldMappings).forEach(([fieldNumber, {name, analyzer, key}]) => {
+      this.analyzers[name] = { analyzer: Mapping.analyzer(fieldNumber, analyzer), key }
     })
   }
 
@@ -46,11 +46,11 @@ class Mapping {
   }
 
   map(field, value) {
-    const {analyzer, fieldKey} = this.getField(field)
+    const {analyzer, key} = this.getField(field)
     const termBuffer = analyzer.perform(value)
     // FIXME: Just keep the 2 keys (prf/prp) as separate fields within the settings (in stash)
     // TODO: Probably should have a format version for the field settings as well
-    const fieldKeyBuffer = Buffer.from(fieldKey, 'hex')
+    const fieldKeyBuffer = Buffer.from(key, 'hex')
     const ore = new ORE(fieldKeyBuffer.slice(0, 16), fieldKeyBuffer.slice(16, 32))
 
     return ore.encrypt(termBuffer.readBigUint64BE())
@@ -60,8 +60,8 @@ class Mapping {
   query(field, condition) {
     const [predicate, value] = condition
 
-    const {analyzer, fieldKey} = this.getField(field)
-    const fieldKeyBuffer = Buffer.from(fieldKey, 'hex')
+    const {analyzer, key} = this.getField(field)
+    const fieldKeyBuffer = Buffer.from(key, 'hex')
     const ore = new ORE(fieldKeyBuffer.slice(0, 16), fieldKeyBuffer.slice(16, 32))
 
     // FIXME: performForQuery should return either a term or a "tuple" (not a single element array)
@@ -87,8 +87,8 @@ class Mapping {
     }
   }
 
-  setField(field, analyzer, fieldKey) {
-    this.analyzers[field] = { analyzer, fieldKey }
+  setField(field, analyzer, key) {
+    this.analyzers[field] = { analyzer, key }
     return this
   }
 
