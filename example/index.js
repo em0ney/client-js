@@ -1,5 +1,4 @@
 const {AuthToken, Stash, Query} = require('@cipherstash/client')
-//const User = require('./user')
 
 const auth = new AuthToken({
   idpHost: process.env.CS_IDP_HOST,
