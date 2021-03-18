@@ -22,9 +22,8 @@ async function run() {
     await users.put({id: 101, name: "Lauren Neko", age: 35})
     const lauren = await users.get(101)
 
-
     q2 = new Query().limit(10).where((q) => {
-      return { age: q.gte(2) }
+      return { name: q.eq("Lauren Neko") }
     })
 
     const results = await users.all(q2.limit(2))
