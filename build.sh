@@ -7,4 +7,6 @@ set -e # exit when a command fails
 set -u # exit when script tries to use undeclared variables
 set -x # trace what gets executed (useful for debugging)
 
+asdf install
+
 npm install
