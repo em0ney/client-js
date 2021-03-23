@@ -8,12 +8,12 @@ set -u # exit when script tries to use undeclared variables
 set -x # trace what gets executed (useful for debugging)
 
 
-subproject_build() {
-  npm install
-}
-
 subproject_setup() {
   asdf install
+}
+
+subproject_build() {
+  npm install
 }
 
 subproject_test() {
