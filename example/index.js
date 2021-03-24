@@ -17,7 +17,14 @@ async function run() {
     const cmk = 'arn:aws:kms:ap-southeast-2:377140853070:key/80c0f67d-e02a-4b59-a314-80a07ef0d4a2'
     const stash = await Stash.connect('localhost:50001', auth, cmk)
 
-    const users = await stash.collection("users")
+    const col = await stash.createCollection("patients", [
+      // TODO: Rename `name` to `field`
+      {name: "name", analyzer: "typeahead"},
+      {name: "dob", analyzer: "uint"}
+    ])
+    console.log("COL", col)
+
+    /*    const users = await stash.collection("users")
 
     await users.put({id: 101, name: "Lauren Neko", age: 35})
     const lauren = await users.get(101)
@@ -26,7 +33,7 @@ async function run() {
       return { name: q.eq("Lauren Neko") }
     })
 
-    const results = await users.all(q2.limit(2))
+    const results = await users.all(q2.limit(2))*/
 
     /*await stash.put(User, {id: 101, name: 'Lauren Neko', age: 35, foo: "bar"})
     await stash.put(User, {id: 102, name: 'Mojito Neko-Draper', age: 6})

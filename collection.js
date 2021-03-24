@@ -20,13 +20,47 @@ function asBuffer(id) {
   }
 }
 
-
 class Collection {
   static from(spec) {
     const {id, fields, cipherSuite} = spec
     const mapping = Mapping.from(fields)
 
     return new Collection(id, mapping, cipherSuite)
+  }
+
+  static async create(name, indexSettings, grpcStub, auth, cipherSuite) {
+    // FIXME: Don't hard-code the secret ID!
+    const clusterKey = await Secrets.getSecret("cs-cluster-secret-0000")
+    const clusterKeyBin = Buffer.from(clusterKey, "base64")
+
+    const hmac = crypto.createHmac('sha256', clusterKeyBin)
+    hmac.update(name)
+    const ref = hmac.digest()
+
+    const indexes = {}
+    indexSettings.forEach((settings, num) => {
+      // When we bundle for the browser we will need to use the web crypto API
+      const fieldKey = crypto.randomBytes(32)
+      indexes[num] = {...settings, key: fieldKey}
+    })
+    
+    const encryptedIndexes = await Promise.all(Object.entries(indexes).map(async ([fieldId, indexSettings]) => {
+      const { result } = await cipherSuite.encrypt(JSON.stringify(indexSettings))
+      return { field_id: parseInt(fieldId), settings: result }
+    }))
+
+    console.log("Plain Ind", indexes)
+    console.log("Enc Ind", encryptedIndexes)
+
+    const request = {
+      ref,
+      indexes: encryptedIndexes
+    }
+
+    const response = await Collection.callGRPC('createCollection', grpcStub, auth, request)
+    console.log("RESPONSE", response)
+    //return new Collection(id, indexes, grpcStub, auth, cipherSuite)
+    return response
   }
 
   static async load(name, grpcStub, auth, cipherSuite) {
@@ -38,7 +72,7 @@ class Collection {
     const clusterKeyBin = Buffer.from(clusterKey, "base64")
 
     const hmac = crypto.createHmac('sha256', clusterKeyBin)
-    hmac.update("users")
+    hmac.update(name)
     const ref = hmac.digest()
     const request = { ref: ref }
     // TODO: Consolidate grpcStub, auth and hostname into one class

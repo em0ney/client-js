@@ -39,6 +39,10 @@ class Stash {
     this.stub.close()
   }
 
+  async createCollection(name, indexes) {
+    return Collection.create(name, indexes, this.stub, this.auth, this.cipherSuite)
+  }
+
   async collection(name) {
     /* Ensure a token is available and federated */
     await this.auth.getToken(this.host)
