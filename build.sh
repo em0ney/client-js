@@ -14,6 +14,7 @@ subproject_setup() {
 
 subproject_build() {
   npm install
+  (cd example && npm install)
 }
 
 subproject_test() {
