@@ -43,14 +43,11 @@ class Collection {
       const fieldKey = crypto.randomBytes(32)
       indexes[num] = {...settings, key: fieldKey}
     })
-    
+
     const encryptedIndexes = await Promise.all(Object.entries(indexes).map(async ([fieldId, indexSettings]) => {
       const { result } = await cipherSuite.encrypt(JSON.stringify(indexSettings))
       return { field_id: parseInt(fieldId), settings: result }
     }))
-
-    console.log("Plain Ind", indexes)
-    console.log("Enc Ind", encryptedIndexes)
 
     const request = {
       ref,
@@ -58,8 +55,6 @@ class Collection {
     }
 
     const response = await Collection.callGRPC('createCollection', grpcStub, auth, request)
-    console.log("RESPONSE", response)
-    //return new Collection(id, indexes, grpcStub, auth, cipherSuite)
     return response
   }
 
@@ -88,8 +83,13 @@ class Collection {
     return new Collection(id, decryptedIndexes, grpcStub, auth, cipherSuite)
   }
 
+  static async delete(id, grpcStub, auth) {
+    const request = await Collection.buildDeleteCollectionRequest(id)
+    const _response = await Collection.callGRPC('deleteCollection', grpcStub, auth, request)
+    return request.id
+  }
+
   constructor(id, indexes, grpcStub, auth, cipherSuite) {
-    console.log(indexes)
     this.id = id
     this.grpcStub = grpcStub
     this.auth = auth
@@ -109,6 +109,7 @@ class Collection {
     const _response = await Collection.callGRPC('put', this.grpcStub, this.auth, request)
     return request.id
   }
+
 
   /* Can be used in several ways:
    *
@@ -142,6 +143,13 @@ class Collection {
   buildGetRequest(id) {
     return {
       collectionId: this.id,
+      id: asBuffer(id)
+    }
+  }
+
+  static buildDeleteCollectionRequest(id) {
+    return {
+      collectionId: id,
       id: asBuffer(id)
     }
   }

@@ -11,13 +11,13 @@ class UInt extends Base {
     const term64 = BigInt(term)
     const buff = Buffer.alloc(8)
 
-    /* Set the buffer to the big int value 
+    /* Set the buffer to the big int value
      * and then set the first byte to the field.
      * This will truncate integers larger than 56 bits */
     buff.writeBigUInt64BE(term64)
     buff.writeUint8(this.field)
 
-    return buff
+    return [ buff ]
   }
 
   performForQuery(predicate, value) {
@@ -46,5 +46,5 @@ class UInt extends Base {
     }
   }
 }
- 
+
 module.exports = UInt;

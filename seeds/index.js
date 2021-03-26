@@ -34,6 +34,9 @@ async function insertSeeds() {
       {name: "address.zipcode", analyzer: "keyword"},
     ])
 
+    // FIXME: For some reason we need to retrieve the collection here
+    // when we should just be able to use the object returned by `createCollection`
+    // above.
     const collection = await stash.collection("patients")
 
     for (let n = 0; n < 100; n++) {

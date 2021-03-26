@@ -1,7 +1,0 @@
-syntax = "proto3";
-
-package stash.GRPC.V1.Documents;
-
-message GetReply {
-  bytes value = 1;
-}

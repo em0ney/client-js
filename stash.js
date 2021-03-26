@@ -27,7 +27,7 @@ class Stash {
    * @param {AuthToken} auth
    * @param {string} version - for forward compatibility (only v1 is valid right now)
    */
-  constructor(host, auth, cmk, version) {
+  constructor(host, auth, cmk, _version) {
     this.stub = GRPC.API(host)
     this.host = host
     this.auth = auth
@@ -41,6 +41,10 @@ class Stash {
 
   async createCollection(name, indexes) {
     return Collection.create(name, indexes, this.stub, this.auth, this.cipherSuite)
+  }
+
+  async deleteCollection(id) {
+    return Collection.delete(id, this.stub, this.auth)
   }
 
   async collection(name) {

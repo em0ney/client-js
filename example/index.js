@@ -1,3 +1,6 @@
+// This file contains example code that uses the Collections API.
+// It currently serves as a smoke test.
+
 const {AuthToken, Stash, Query} = require('@cipherstash/client')
 
 const auth = new AuthToken({
@@ -17,52 +20,35 @@ async function run() {
     const cmk = 'arn:aws:kms:ap-southeast-2:377140853070:key/80c0f67d-e02a-4b59-a314-80a07ef0d4a2'
     const stash = await Stash.connect('localhost:50001', auth, cmk)
 
-    const col = await stash.createCollection("patients", [
+    // FIXME: for some reason the return value is not the same as when getting a collection
+    const _users = await stash.createCollection("users", [
       // TODO: Rename `name` to `field`
       {name: "name", analyzer: "typeahead"},
-      {name: "dob", analyzer: "uint"}
+      {name: "position", analyzer: "keyword"}
     ])
-    console.log("COL", col)
 
-    /*    const users = await stash.collection("users")
+    console.log("☑️ Collection created");
 
-    await users.put({id: 101, name: "Lauren Neko", age: 35})
-    const lauren = await users.get(101)
+    const users = await stash.collection("users")
+    console.log("☑️ Collection retrieved");
+
+    await users.put({id: 101, name: "Dan Draper", position: "Founder & CEO"})
+    await users.put({id: 102, name: "Lindsay Holmwood", position: "CPO"})
+    await users.put({id: 103, name: "James Sadler", position: "CTO"})
+    console.log("☑️ Inserted records into collection");
+
+    const _user = await users.get(101)
+    console.log("☑️ Retrieved a record from the collection");
 
     q2 = new Query().limit(10).where((q) => {
-      return { name: q.eq("Lauren Neko") }
+      return { name: q.match("Dan") }
     })
 
-    const results = await users.all(q2.limit(2))*/
+    const _results = await users.all(q2.limit(2))
+    console.log("☑️ Queried the collection");
 
-    /*await stash.put(User, {id: 101, name: 'Lauren Neko', age: 35, foo: "bar"})
-    await stash.put(User, {id: 102, name: 'Mojito Neko-Draper', age: 6})
-
-    // Using a promise
-    stash.put(User, {id: 100, name: 'Dan Draper', age: 39}).then(async (a) => {
-      stash.get(User, a)
-      .then((r) => { console.log("GET", r) })
-      .catch((err) => console.error("GET ERR", err))
-
-      stash.all(User, new Query().where({name: "Dan Draper"}))
-      .then((results) => console.log("Results", results))
-      .catch((err) => console.error("Query error", err))
-
-      q2 = new Query().limit(10).where((q) => {
-        return { age: q.gte(2) }
-      })
-
-      stash.all(User, q2.limit(2))
-      .then((res) => { console.log("RANGE", res) })
-      .catch((err) => console.error("Query error", err))*/
-
-      /* Example query using await */
-      /*const results = await stash.all(User, (q) => {
-        return {age: q.between(0, 100)}
-      })
-      console.log('AWAIT RESULTS', results)
-
-      }).catch((err) => console.error("PUT FAILED", err))*/
+    await stash.deleteCollection(users.id)
+    console.log("☑️ Deleted the collection");
   } catch(error) {
     console.error("FAILED", error)
   }

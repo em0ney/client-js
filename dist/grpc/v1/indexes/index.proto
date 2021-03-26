@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-package stash.GRPC.V1.Indexes;
-
-message Index {
-  bytes id = 1;
-  bytes settings = 2;
-  int32 field_id = 3;
-}
