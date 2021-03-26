@@ -47,13 +47,13 @@ class Mapping {
 
   map(field, value) {
     const {analyzer, key} = this.getField(field)
-    const termBuffer = analyzer.perform(value)
+    const termBuffers = analyzer.perform(value)
     // FIXME: Just keep the 2 keys (prf/prp) as separate fields within the settings (in stash)
     // TODO: Probably should have a format version for the field settings as well
     const fieldKeyBuffer = Buffer.from(key, 'hex')
     const ore = new ORE(fieldKeyBuffer.slice(0, 16), fieldKeyBuffer.slice(16, 32))
 
-    return ore.encrypt(termBuffer.readBigUint64BE())
+    return termBuffers.map(buffer => ore.encrypt(buffer.readBigUint64BE()))
   }
 
   // Handle single or an array of conditions
