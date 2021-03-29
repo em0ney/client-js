@@ -17,7 +17,7 @@ const auth = new AuthToken({
 
 async function run() {
   try {
-    const cmk = 'arn:aws:kms:ap-southeast-2:377140853070:key/80c0f67d-e02a-4b59-a314-80a07ef0d4a2'
+    const cmk = process.env.CS_DEV_CMK
     const stash = await Stash.connect('localhost:50001', auth, cmk)
 
     // FIXME: for some reason the return value is not the same as when getting a collection
