@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Dan Draper",
+  "author": "James Sadler <james@cipherstash.com>",
   "license": "Apache-2.0",
   "dependencies": {
     "@cipherstash/client": "../",
