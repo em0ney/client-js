@@ -22,7 +22,7 @@ const DATA = {
 const EXPIRY_BUFFER = 20
 
 class AuthToken {
-  /* 
+  /*
    * Instantiates a new AuthToken.
    * Tokens are cached up to just before they expire along with the data service for which
    * they have been issued. This prevents a cached token being eroneously used for a new data server.
@@ -100,15 +100,16 @@ class AuthToken {
    * @param {string} dataServer - the URL of the data server we want access to
    */
   authenticate(dataServer) {
-    const body = querystring.stringify({
-      audience: dataServer,
-      ...this.data
-    })
-
     return new Promise((resolve, reject) => {
+      let chunks = []
+
       const req = https.request(this.request, (res) => {
-        res.on('data', (data) => {
-          const response = JSON.parse(data)
+        res.on('data', (chunk) => {
+          chunks.push(chunk)
+        });
+
+        res.on('end', () => {
+          const response = JSON.parse(chunks.join(''))
 
           if (response.error) {
             reject(response)
@@ -118,9 +119,15 @@ class AuthToken {
         });
       });
 
-      req.on('error', (e) => reject(e))
+      req.on('error', (e) => {
+        reject(e)
+      })
 
-      req.write(body);
+      req.write(querystring.stringify({
+        audience: dataServer,
+        ...this.data
+      }));
+
       req.end();
     })
   }
