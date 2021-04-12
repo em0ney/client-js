@@ -7,7 +7,7 @@ class TypeAhead extends Base {
     const terms = term.toLowerCase().split(/[,;:!]/).flatMap((token) => {
       return this.ngrams(token, 3);
     }).map((gram) => {
-      return this.sipHashStrWithField(gram);
+      return this.sipHashTerm(gram);
     });
 
     return terms;
@@ -38,5 +38,5 @@ class TypeAhead extends Base {
     return ngramsArray;
   }
 }
- 
+
 module.exports = TypeAhead;

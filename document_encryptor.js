@@ -11,6 +11,7 @@ const DocumentEncryptor = async (doc, cipherSuite) => {
   return cipherSuite.encrypt(plaintext).then(({ result }) => { return result })
 }
 
+// FIXME: call this "decryptor" because it doesn't know or need to know anything about documents.
 const DocumentDecryptor = async (cipherText, cipherSuite) => {
   if (cipherText instanceof Array) {
     // TODO: Use a decryptAll function instead

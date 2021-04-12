@@ -1,5 +1,5 @@
 
-const { v4: uuidv4, parse: parseUUID } = require('uuid')
+const { v4: uuidv4, stringify: uuidStringify, parse: parseUUID } = require('uuid')
 const Indexer = require('./indexer')
 const { DocumentEncryptor, DocumentDecryptor } = require('./document_encryptor')
 const QueryBuilder = require('./query_builder')
@@ -21,12 +21,6 @@ function asBuffer(id) {
 }
 
 class Collection {
-  static from(spec) {
-    const {id, fields, cipherSuite} = spec
-    const mapping = Mapping.from(fields)
-
-    return new Collection(id, mapping, cipherSuite)
-  }
 
   static async create(name, indexSettings, grpcStub, auth, cipherSuite) {
     // FIXME: Don't hard-code the secret ID!
@@ -73,11 +67,12 @@ class Collection {
     // TODO: Consolidate grpcStub, auth and hostname into one class
     const {id, indexes} = await Collection.callGRPC('collectionInfo', grpcStub, auth, request)
 
+
     const decryptedIndexes  = await indexes.reduce(async (acc, index) => {
-      const {settings, field_id: fieldId} = index
+      const {settings, id} = index
       const plaintextSettings = await cipherSuite.decrypt(settings)
 
-      return Object.assign(await acc, { [fieldId]: plaintextSettings })
+      return Object.assign(await acc, { [id.toString('hex')]: plaintextSettings })
     }, Promise.resolve({}))
 
     return new Collection(id, decryptedIndexes, grpcStub, auth, cipherSuite)
@@ -99,8 +94,9 @@ class Collection {
 
   async get(id) {
     const request = this.buildGetRequest(id)
-    const { value } = await Collection.callGRPC('get', this.grpcStub, this.auth, request)
-    return this.handleResponse(value)
+    const response = await Collection.callGRPC('get', this.grpcStub, this.auth, request)
+    const { source } = response
+    return this.handleResponse(source)
   }
 
   async put(doc) {
@@ -136,8 +132,9 @@ class Collection {
     const query = Query.from(queryable)
     const request = await this.buildQueryRequest(query)
 
-    const { result } = await Collection.callGRPC('query', this.grpcStub, this.auth, request)
-    return this.handleResponse(result)
+    const response = await Collection.callGRPC('query', this.grpcStub, this.auth, request)
+    const { result } = response
+    return DocumentDecryptor(result, this.cipherSuite)
   }
 
   buildGetRequest(id) {
@@ -155,42 +152,51 @@ class Collection {
   }
 
   async buildPutRequest(doc) {
-    // TODO Put into a utility function
-    let docId = uuidv4({}, Buffer.alloc(16));
-
-    if (doc.id) {
-      docId = asBuffer(doc.id);
-    }
+    let docId = doc.id ? asBuffer(doc.id) : uuidv4({}, Buffer.alloc(16))
 
     const data = await Promise.all([
       Indexer(doc, this.mapping),
       DocumentEncryptor(doc, this.cipherSuite)
     ])
-    const [postings, source] = data
 
-    return {
+    const [vectors, source] = data
+
+    const putRequest = {
       collectionId: this.id,
-      value: source,
-      id: docId,
-      posting: docId,
-      terms: postings
+      source: {
+        id: docId,
+        source
+      },
+      vectors: vectors.map(({indexId, ore}) => {
+        return {
+          indexId: indexId,
+          terms: [{
+            term: ore,
+            link: docId
+          }]
+        }
+      })
     }
+
+    return putRequest
   }
 
   async buildQueryRequest({constraints, recordLimit}) {
-    // TODO: This should return an object containing limit, after and terms
-    const terms = constraints.flatMap(([field, condition]) => {
-      return this.mapping.query(field, condition)
-    })
-    return {
+    const queryRequest = {
       collectionId: this.id,
-      terms: terms,
-      limit: recordLimit
+      query: {
+        limit: recordLimit,
+        constraints: constraints.flatMap(([field, condition]) =>
+          this.mapping.query(field, condition)
+        )
+      }
     }
+
+    return queryRequest
   }
 
   async handleResponse(response) {
-    return DocumentDecryptor(response, this.cipherSuite)
+    return DocumentDecryptor(response.source, this.cipherSuite)
   }
 
   static callGRPC(fun, stub, auth, requestBody) {

@@ -2,37 +2,30 @@ const { Keyword, UInt, TypeAhead } = require("./analysis");
 const ORE = require("@cipherstash/ore");
 
 class Mapping {
-  static analyzer(fieldNumber, analyzer) {
-    switch (analyzer) {
+  static analyzer(analyzerName) {
+    switch (analyzerName) {
       case "keyword":
-        return new Keyword(fieldNumber);
+        return new Keyword();
 
       case "uint":
-        return new UInt(fieldNumber);
+        return new UInt();
 
       case "typeahead":
-        return new TypeAhead(fieldNumber);
+        return new TypeAhead();
 
       default:
-        throw `Unknown analyzer ${analyzer}`;
+        throw `Unknown analyzerName ${analyzerName}`;
     }
   }
 
-  /*
-    fieldMappings is an object shaped like this:
-    {
-      0: { name: "email", analyzer: __, key: _},
-      1: { name: "age", analyzer: __, key: _},
-    }
-  */
   constructor(fieldMappings) {
     this.analyzers = {};
-    // TODO: `fieldNumber`is a string encoding of an integer right now but will be a UUID soon
-    // There is lower level code that depends on it being an integer right now.
+
     Object.entries(fieldMappings).forEach(
-      ([fieldNumber, { name, analyzer, key }]) => {
+      ([indexId, { name, analyzer, key }]) => {
         this.analyzers[name] = {
-          analyzer: Mapping.analyzer(fieldNumber, analyzer),
+          indexId: Buffer.from(indexId, 'hex'),
+          analyzer: Mapping.analyzer(analyzer),
           key,
         };
       }
@@ -40,19 +33,19 @@ class Mapping {
   }
 
   mapAll(record) {
-    return Object.keys(this.analyzers).flatMap((field) => {
-      const value = record[field];
+    return Object.entries(this.analyzers).map(([fieldName, { indexId }]) => {
+      const value = record[fieldName];
       if (value) {
-        const mapped = this.map(field, value)
-        return mapped
+        return this.map(indexId, fieldName, value)
       } else {
         return [];
       }
-    });
+    })
   }
 
-  map(field, value) {
-    const { analyzer, key } = this.getField(field);
+  map(indexId, fieldName, value) {
+    const { analyzer, key } = this.getField(fieldName);
+
     const termBuffers = analyzer.perform(value);
 
     // FIXME: Just keep the 2 keys (prf/prp) as separate fields within the settings (in stash)
@@ -64,7 +57,7 @@ class Mapping {
     );
 
     return termBuffers.map((buffer) => {
-      return ore.encrypt(buffer.readBigUint64BE());
+      return { indexId, ore: ore.encrypt(buffer.readBigUint64BE()) }
     });
   }
 
@@ -72,7 +65,7 @@ class Mapping {
   query(field, condition) {
     const [predicate, value] = condition
 
-    const {analyzer, key} = this.getField(field)
+    const {indexId, analyzer, key} = this.getField(field)
     const fieldKeyBuffer = Buffer.from(key, 'hex')
     const ore = new ORE(fieldKeyBuffer.slice(0, 16), fieldKeyBuffer.slice(16, 32))
 
@@ -84,18 +77,21 @@ class Mapping {
       const {left: minL, right: minR} = ore.encrypt(min.readBigUint64BE())
       const {left: maxL, right: maxR} = ore.encrypt(max.readBigUint64BE())
 
-      // TODO: Use a constant instead of magic number
-      return Buffer.concat([
-        Buffer.from([1]),
-        minL,
-        minR,
-        maxL,
-        maxR
-      ])
+      return {
+        indexId,
+        range: {
+          upper: Buffer.concat([maxL, maxR]),
+          lower: Buffer.concat([minL, minR]),
+        }
+      }
     } else {
       const {left: left, right: right} = ore.encrypt(term.readBigUint64BE())
-      // TODO: Use a constant instead of magic number
-      return Buffer.concat([Buffer.from([0]), left, right])
+      return {
+        indexId,
+        exact: {
+          term: Buffer.concat([left, right])
+        }
+      }
     }
   }
 

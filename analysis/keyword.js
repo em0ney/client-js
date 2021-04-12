@@ -4,7 +4,7 @@ const Base = require('./base');
 class Keyword extends Base {
   perform(term) {
     // TODO: This should use the fieldKey (not a universally hard coded key)
-    return [ this.sipHashStrWithField(term) ]
+    return [ this.sipHashTerm(term) ]
   }
 
   // TODO: Test this

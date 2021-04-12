@@ -15,6 +15,16 @@ const auth = new AuthToken({
   }
 })
 
+async function queryWithAssertion(collection, query, assertion) {
+  const results = await collection.all(query)
+  if (assertion(results)) {
+    console.log("☑️ Queried the collection and got expected match");
+  } else {
+    console.error("❌ The query did not return the expected result")
+    process.exit(1)
+  }
+}
+
 async function run() {
   try {
     const cmk = process.env.CS_DEV_CMK
@@ -24,7 +34,8 @@ async function run() {
     const _users = await stash.createCollection("users", [
       // TODO: Rename `name` to `field`
       {name: "name", analyzer: "typeahead"},
-      {name: "position", analyzer: "keyword"}
+      {name: "position", analyzer: "keyword"},
+      {name: "age", analyzer: "uint"},
     ])
 
     console.log("☑️ Collection created");
@@ -32,20 +43,43 @@ async function run() {
     const users = await stash.collection("users")
     console.log("☑️ Collection retrieved");
 
-    await users.put({id: 101, name: "Dan Draper", position: "Founder & CEO"})
-    await users.put({id: 102, name: "Lindsay Holmwood", position: "CPO"})
-    await users.put({id: 103, name: "James Sadler", position: "CTO"})
+    await users.put({id: 101, name: "Dan Draper", position: "Founder & CEO", age: 39})
+    await users.put({id: 102, name: "Lindsay Holmwood", position: "CPO", age: 35})
+    await users.put({id: 103, name: "James Sadler", position: "CTO", age: 43})
     console.log("☑️ Inserted records into collection");
 
     const _user = await users.get(101)
     console.log("☑️ Retrieved a record from the collection");
 
-    q2 = new Query().limit(10).where((q) => {
-      return { name: q.match("Dan") }
-    })
+    await queryWithAssertion(users, new Query().limit(10).where((q) =>
+      ({ name: q.match("Dan") })
+    ), (results) =>
+      results.length === 1 && results[0].name === "Dan Draper"
+    )
 
-    const _results = await users.all(q2.limit(2))
-    console.log("☑️ Queried the collection");
+    await queryWithAssertion(users, new Query().limit(10).where((q) =>
+      ({ name: q.match("Hans Gruber") })
+    ), (results) => results.length === 0)
+
+    await queryWithAssertion(users, new Query().limit(10).where((q) =>
+      ({ position: q.eq("CPO") })
+    ), (results) =>
+      results.length === 1 && results[0].name === "Lindsay Holmwood"
+    )
+
+    await queryWithAssertion(users, new Query().limit(10).where((q) =>
+      ({ position: q.eq("Santa's Little Helper") })
+    ), (results) => results.length === 0)
+
+    await queryWithAssertion(users, new Query().limit(10).where((q) =>
+      ({ age: q.gte(43) })
+    ), (results) =>
+      results.length === 1 && results[0].name === "James Sadler"
+    )
+
+    await queryWithAssertion(users, new Query().limit(10).where((q) =>
+      ({ age: q.lt(20) })
+    ), (results) => results.length === 0)
 
     await stash.deleteCollection(users.id)
     console.log("☑️ Deleted the collection");
