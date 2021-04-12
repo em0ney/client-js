@@ -15,7 +15,7 @@ test('nothing is indexed when no matching fields are mapped', async () => {
     0: { name: "email", analyzer: 'keyword', key: key }
   })
 
-  const terms = await Indexer({name: "Dan"}, mapping, null)
+  const terms = await Indexer({name: "Dan"}, mapping)
   expect(terms).toEqual([])
 })
 

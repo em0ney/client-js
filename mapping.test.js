@@ -4,6 +4,7 @@ const {Keyword, TypeAhead, UInt} = require('./analysis')
 const fieldKeyCity = "c55f5b0221336878fe4b9a63e2fa89d73956c6492a40c53b312254f85ed4e209"
 const fieldKeyAge = "ef135cf590e5bac75451d3f512d9f80eaf65a4198663c5fc57ffb264c6ed0eee"
 
+
 const cityAndAgeMapper = new Mapping({
   0: { name: 'city', analyzer: 'keyword', key: fieldKeyCity },
   1: { name: 'age', analyzer: 'uint', key: fieldKeyAge },
@@ -15,27 +16,24 @@ test('get field with no analyzer set', () => {
 })
 
 test('set and get field settings', () => {
-  expect(cityAndAgeMapper.getField('city')).toEqual({analyzer: new Keyword('0'), key: fieldKeyCity})
-  expect(cityAndAgeMapper.getField('age')).toEqual({analyzer: new UInt('1'), key: fieldKeyAge})
+  expect(cityAndAgeMapper.getField('city')).toEqual({indexId: expect.anything(), analyzer: new Keyword(), key: fieldKeyCity})
+  expect(cityAndAgeMapper.getField('age')).toEqual({indexId: expect.anything(), analyzer: new UInt(), key: fieldKeyAge})
 })
 
 describe('Analyzer shortcuts', () => {
   test('keyword analyzer correctly instantiates', () => {
-    const analyzer = Mapping.analyzer(1, 'keyword')
+    const analyzer = Mapping.analyzer('keyword')
     expect(analyzer).toBeInstanceOf(Keyword)
-    expect(analyzer.field).toEqual(1)
   })
 
   test('typeahead analyzer correctly instantiates', () => {
-    const analyzer = Mapping.analyzer(3, 'typeahead')
+    const analyzer = Mapping.analyzer('typeahead')
     expect(analyzer).toBeInstanceOf(TypeAhead)
-    expect(analyzer.field).toEqual(3)
   })
 
   test('uint analyzer correctly instantiates', () => {
-    const analyzer = Mapping.analyzer(2, 'uint')
+    const analyzer = Mapping.analyzer('uint')
     expect(analyzer).toBeInstanceOf(UInt)
-    expect(analyzer.field).toEqual(2)
   })
 })
 
