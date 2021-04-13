@@ -1,7 +1,7 @@
 
 const { v4: uuidv4, stringify: uuidStringify, parse: parseUUID } = require('uuid')
 const Indexer = require('./indexer')
-const { DocumentEncryptor, DocumentDecryptor } = require('./document_encryptor')
+const { SourceEncryptor, SourceDecryptor } = require('./source_encryptor')
 const QueryBuilder = require('./query_builder')
 const Mapping = require('./mapping')
 const Secrets = require('./secrets')
@@ -132,9 +132,8 @@ class Collection {
     const query = Query.from(queryable)
     const request = await this.buildQueryRequest(query)
 
-    const response = await Collection.callGRPC('query', this.grpcStub, this.auth, request)
-    const { result } = response
-    return DocumentDecryptor(result, this.cipherSuite)
+    const { result } = await Collection.callGRPC('query', this.grpcStub, this.auth, request)
+    return SourceDecryptor(result, this.cipherSuite)
   }
 
   buildGetRequest(id) {
@@ -156,7 +155,7 @@ class Collection {
 
     const data = await Promise.all([
       Indexer(doc, this.mapping),
-      DocumentEncryptor(doc, this.cipherSuite)
+      SourceEncryptor(doc, this.cipherSuite)
     ])
 
     const [vectors, source] = data
@@ -196,7 +195,7 @@ class Collection {
   }
 
   async handleResponse(response) {
-    return DocumentDecryptor(response.source, this.cipherSuite)
+    return SourceDecryptor(response.source, this.cipherSuite)
   }
 
   static callGRPC(fun, stub, auth, requestBody) {
