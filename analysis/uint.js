@@ -6,10 +6,36 @@ const MAX_VALUE = ((1n << BigInt(NUM_BITS)) - 1n)
 
 class UInt extends Base {
   perform(term) {
-    return [ this._perform(term) ]
+    return [ this._toUintBuffer(term) ]
   }
 
-  _perform(term) {
+  performForQuery(predicate, value) {
+    switch (predicate) {
+      case "==":
+        return [this._toUintBuffer(value)];
+
+      case ">=":
+        return [[this._toUintBuffer(value), this._toUintBuffer(MAX_VALUE)]];
+
+      case "<=":
+        return [[this._toUintBuffer(0n), this._toUintBuffer(value)]];
+
+      case ">":
+        return [[this._toUintBuffer(BigInt(value) + 1n), this._toUintBuffer(MAX_VALUE)]];
+
+      case "<":
+        return [[this._toUintBuffer(0n), this._toUintBuffer(BigInt(value) - 1n)]];
+
+      case "><":
+        const [min, max] = value;
+        return [[this._toUintBuffer(min), this._toUintBuffer(max)]];
+
+      default:
+        this.throwUnknownPredicate(predicate);
+    }
+  }
+
+  _toUintBuffer(term) {
     // TODO: Force conversion to Bigint - and test that
     const term64 = BigInt(term)
     const buff = Buffer.alloc(8)
@@ -19,31 +45,6 @@ class UInt extends Base {
     return buff
   }
 
-  performForQuery(predicate, value) {
-    switch (predicate) {
-      case "==":
-        return [this._perform(value)];
-
-      case ">=":
-        return [[this._perform(value), this._perform(MAX_VALUE)]];
-
-      case "<=":
-        return [[this._perform(0n), this._perform(value)]];
-
-      case ">":
-        return [[this._perform(BigInt(value) + 1n), this._perform(MAX_VALUE)]];
-
-      case "<":
-        return [[this._perform(0n), this._perform(BigInt(value) - 1n)]];
-
-      case "><":
-        const [min, max] = value;
-        return [[this._perform(min), this._perform(max)]];
-
-      default:
-        this.throwUnknownPredicate(predicate);
-    }
-  }
 }
 
 module.exports = UInt;
