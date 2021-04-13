@@ -94,8 +94,7 @@ class Collection {
 
   async get(id) {
     const request = this.buildGetRequest(id)
-    const response = await Collection.callGRPC('get', this.grpcStub, this.auth, request)
-    const { source } = response
+    const { source } = await Collection.callGRPC('get', this.grpcStub, this.auth, request)
     return this.handleResponse(source)
   }
 
