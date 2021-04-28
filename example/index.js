@@ -44,7 +44,7 @@ async function run() {
     console.log("☑️ Collection retrieved");
 
     await users.put({id: 101, name: "Dan Draper", position: "Founder & CEO", age: 39})
-    await users.put({id: 102, name: "Lindsay Holmwood", position: "CPO", age: 35})
+    await users.put({id: 102, name: "Lindsay Holmwood", position: "CPO", age: 33})
     await users.put({id: 103, name: "James Sadler", position: "CTO", age: 43})
     console.log("☑️ Inserted records into collection");
 
