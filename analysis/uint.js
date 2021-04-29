@@ -1,7 +1,7 @@
 
 const Base = require('./base');
 // TODO: Move these to methods on the base
-const NUM_BITS = 56
+const NUM_BITS = 64
 const MAX_VALUE = ((1n << BigInt(NUM_BITS)) - 1n)
 
 class UInt extends Base {
@@ -35,6 +35,8 @@ class UInt extends Base {
     }
   }
 
+  /* Writes a 64-bit unsigned integer to a Buffer
+   * in BigEndian order */
   _toUintBuffer(term) {
     // TODO: Force conversion to Bigint - and test that
     const term64 = BigInt(term)
