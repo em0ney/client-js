@@ -200,7 +200,6 @@ class Collection {
   static callGRPC(fun, stub, dataServiceId, auth, requestBody) {
     return new Promise((resolve, reject) => {
       /* Start by making sure we have a token */
-      console.log("Calling auth with", dataServiceId)
       auth.getToken(dataServiceId).then((authToken) => {
         const request = {
           context: { authToken },
@@ -209,7 +208,6 @@ class Collection {
 
         stub[fun](request, (err, res) => {
           if (err) {
-            console.log("AAAAAAAAA")
             reject(err)
           } else {
             resolve(res)
