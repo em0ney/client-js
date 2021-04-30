@@ -60,7 +60,6 @@ class AuthToken {
       /* Federate the token if configured */
       this.federateToken(access_token)
     }
-    console.log("HI?", this.tokens)
     return this.tokens[dataServiceId].accessToken
   }
 
@@ -81,12 +80,9 @@ class AuthToken {
         }
       }, {region: region})
 
-      console.log(AWS.config.credentials)
-
       AWS.config.credentials.get((err) => {
         // TODO: Use a custom exception to make it easier to identify
         if (err) {
-          console.log("ERRRRRRR. AT was ", accessToken)
           throw(err)
         }
       })
