@@ -12,7 +12,7 @@ class CipherSuite {
   #context = null
   #keyring = null
 
-  constructor(generatorKeyId, oreKey) {
+  constructor(generatorKeyId) {
     this.#keyring = new KmsKeyringNode({ generatorKeyId })
     this.#context = {
       version: "0.1",

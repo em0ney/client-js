@@ -32,15 +32,13 @@ class Stash {
     this.host = host
     this.clusterId = clusterId
     this.auth = auth
-    const oreKeyTemp = Buffer.from('2e877eebe7f0b8ef1492f314d66c4dcce6c53234aa05cfe2dd54df83d18d09be', 'hex')
-    this.cipherSuite = new CipherSuite(cmk, oreKeyTemp) // FIXME: CipherSuite shouldn't take the ORE key in the constructor
+    this.cipherSuite = new CipherSuite(cmk)
   }
 
   close() {
     this.stub.close()
   }
 
-  // MARK
   async createCollection(name, indexes) {
     return Collection.create(name, indexes, this.stub, this.clusterId, this.auth, this.cipherSuite)
   }
