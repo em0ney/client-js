@@ -45,22 +45,23 @@ class AuthToken {
   /*
    * Gets an Auth token for the given server. This will fail if access is denied.
    *
-   * @param {string} dataServer the URL of the stash data service we want to connect to
+   * @param {string} dataServiceId the ID of the data service
    * @returns {Promise} a promise for the token
    */
-  async getToken(dataServer) {
+  async getToken(dataServiceId) {
     // Check if token is set and not expired
     // authenticate and return the token or just return the token
-    if (!this.tokenValid(dataServer)) {
-      const {access_token, expires_in} = await this.authenticate(dataServer)
-      this.tokens[dataServer] = {
+    if (!this.tokenValid(dataServiceId)) {
+      const {access_token, expires_in} = await this.authenticate(dataServiceId)
+      this.tokens[dataServiceId] = {
         accessToken: access_token,
         expiresAt: Math.trunc((new Date()).getTime() / 1000) + expires_in - EXPIRY_BUFFER
       }
       /* Federate the token if configured */
       this.federateToken(access_token)
     }
-    return this.tokens[dataServer].accessToken
+    console.log("HI?", this.tokens)
+    return this.tokens[dataServiceId].accessToken
   }
 
   /*
@@ -80,8 +81,14 @@ class AuthToken {
         }
       }, {region: region})
 
+      console.log(AWS.config.credentials)
+
       AWS.config.credentials.get((err) => {
-        if (err) throw(err)
+        // TODO: Use a custom exception to make it easier to identify
+        if (err) {
+          console.log("ERRRRRRR. AT was ", accessToken)
+          throw(err)
+        }
       })
     }
   }
@@ -90,16 +97,16 @@ class AuthToken {
    * Determines if we already have a valid auth token for the data
    * server
   * */
-  tokenValid(dataServer) {
-    return !!this.tokens[dataServer]
+  tokenValid(dataServiceId) {
+    return !!this.tokens[dataServiceId]
   }
 
   /*
    * Performs an OAuth2 exchange using a client credentials grant to the IdP
    *
-   * @param {string} dataServer - the URL of the data server we want access to
+   * @param {string} dataServiceId - the ID for the data service
    */
-  authenticate(dataServer) {
+  authenticate(dataServiceId) {
     return new Promise((resolve, reject) => {
       let chunks = []
 
@@ -124,7 +131,7 @@ class AuthToken {
       })
 
       req.write(querystring.stringify({
-        audience: dataServer,
+        audience: dataServiceId,
         ...this.data
       }));
 
