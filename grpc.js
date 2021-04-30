@@ -19,11 +19,6 @@ const grpcDefinition = protoLoader.loadSync(
 )
 
 const APIProto = gRPC.loadPackageDefinition(grpcDefinition).stash
-
-//const rootCert = fs.readFileSync("/home/dan/.local/share/mkcert/rootCA.pem")
-
-// TODO: Don't use insecure creds (i.e. use SSL)
-//const gRPCCreds = gRPC.credentials.createInsecure()
 const gRPCCreds = gRPC.credentials.createSsl() // TODO: Verify the cert
 
 const V1 = {
