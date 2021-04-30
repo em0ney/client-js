@@ -12,12 +12,12 @@ class Stash {
    * @param {AuthToken} auth - instance of an AuthToken
    * @param {string} version - for forward compatibility (only v1 is valid right now)
    */
-  static async connect(host, auth, version = "v1") {
-    const stash = new Stash(host, auth, version)
+  static async connect(host, clusterId, auth, version = "v1") {
+    const stash = new Stash(host, clusterId, auth, version)
 
     /* Get a token at startup so that any federated identities
      * (required for encryption) are ready */
-    await auth.getToken(host)
+    await auth.getToken(clusterId)
 
     return stash
   }
@@ -27,9 +27,10 @@ class Stash {
    * @param {AuthToken} auth
    * @param {string} version - for forward compatibility (only v1 is valid right now)
    */
-  constructor(host, auth, cmk, _version) {
+  constructor(host, clusterId, auth, cmk, _version) {
     this.stub = GRPC.API(host)
     this.host = host
+    this.clusterId = clusterId
     this.auth = auth
     const oreKeyTemp = Buffer.from('2e877eebe7f0b8ef1492f314d66c4dcce6c53234aa05cfe2dd54df83d18d09be', 'hex')
     this.cipherSuite = new CipherSuite(cmk, oreKeyTemp) // FIXME: CipherSuite shouldn't take the ORE key in the constructor
@@ -39,19 +40,20 @@ class Stash {
     this.stub.close()
   }
 
+  // MARK
   async createCollection(name, indexes) {
-    return Collection.create(name, indexes, this.stub, this.auth, this.cipherSuite)
+    return Collection.create(name, indexes, this.stub, this.clusterId, this.auth, this.cipherSuite)
   }
 
   async deleteCollection(id) {
-    return Collection.delete(id, this.stub, this.auth)
+    return Collection.delete(id, this.stub, this.clusterId, this.auth)
   }
 
   async collection(name) {
     /* Ensure a token is available and federated */
-    await this.auth.getToken(this.host)
+    await this.auth.getToken(this.clusterId)
 
-    return await Collection.load(name, this.stub, this.auth, this.cipherSuite)
+    return await Collection.load(name, this.stub, this.clusterId, this.auth, this.cipherSuite)
   }
 
 }

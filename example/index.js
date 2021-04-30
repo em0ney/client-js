@@ -28,7 +28,7 @@ async function queryWithAssertion(collection, query, assertion) {
 async function run() {
   try {
     const cmk = process.env.CS_DEV_CMK
-    const stash = await Stash.connect('data-service.local:50001', auth, cmk)
+    const stash = await Stash.connect('data-service.local:50001', 'sky-fog-7350', auth, cmk)
 
     // FIXME: for some reason the return value is not the same as when getting a collection
     const _users = await stash.createCollection("users", [

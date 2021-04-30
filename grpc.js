@@ -2,6 +2,7 @@
 const gRPC = require('@grpc/grpc-js')
 const protoLoader = require('@grpc/proto-loader')
 const path = require('path')
+const fs = require('fs')
 
 const PROTO_BASE_PATH = path.join(module.path, 'dist', 'grpc')
 const API_PROTO_FILE = path.join(PROTO_BASE_PATH, 'v1', 'api.proto')
@@ -19,8 +20,11 @@ const grpcDefinition = protoLoader.loadSync(
 
 const APIProto = gRPC.loadPackageDefinition(grpcDefinition).stash
 
+//const rootCert = fs.readFileSync("/home/dan/.local/share/mkcert/rootCA.pem")
+
 // TODO: Don't use insecure creds (i.e. use SSL)
-const gRPCCreds = gRPC.credentials.createInsecure()
+//const gRPCCreds = gRPC.credentials.createInsecure()
+const gRPCCreds = gRPC.credentials.createSsl() // TODO: Verify the cert
 
 const V1 = {
   API: function(host) {

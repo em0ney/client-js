@@ -22,9 +22,9 @@ function asBuffer(id) {
 
 class Collection {
 
-  static async create(name, indexSettings, grpcStub, auth, cipherSuite) {
+  static async create(name, indexSettings, grpcStub, dataServiceId, auth, cipherSuite) {
     // FIXME: Don't hard-code the secret ID!
-    const clusterKey = await Secrets.getSecret("cs-cluster-secret-0000")
+    const clusterKey = await Secrets.getSecret(`cs-cluster-secret-${dataServiceId}`)
     const clusterKeyBin = Buffer.from(clusterKey, "base64")
 
     const hmac = crypto.createHmac('sha256', clusterKeyBin)
@@ -48,16 +48,16 @@ class Collection {
       indexes: encryptedIndexes
     }
 
-    const response = await Collection.callGRPC('createCollection', grpcStub, auth, request)
+    const response = await Collection.callGRPC('createCollection', grpcStub, dataServiceId, auth, request)
     return response
   }
 
-  static async load(name, grpcStub, auth, cipherSuite) {
+  static async load(name, grpcStub, dataServiceId, auth, cipherSuite) {
     this.grpcStub = grpcStub
     this.cipherSuite = cipherSuite
 
     // FIXME: Don't hard-code the secret ID!
-    const clusterKey = await Secrets.getSecret("cs-cluster-secret-0000")
+    const clusterKey = await Secrets.getSecret(`cs-cluster-secret-${dataServiceId}`)
     const clusterKeyBin = Buffer.from(clusterKey, "base64")
 
     const hmac = crypto.createHmac('sha256', clusterKeyBin)
@@ -65,8 +65,7 @@ class Collection {
     const ref = hmac.digest()
     const request = { ref: ref }
     // TODO: Consolidate grpcStub, auth and hostname into one class
-    const {id, indexes} = await Collection.callGRPC('collectionInfo', grpcStub, auth, request)
-
+    const {id, indexes} = await Collection.callGRPC('collectionInfo', grpcStub, dataServiceId, auth, request)
 
     const decryptedIndexes  = await indexes.reduce(async (acc, index) => {
       const {settings, id} = index
@@ -75,18 +74,19 @@ class Collection {
       return Object.assign(await acc, { [id.toString('hex')]: plaintextSettings })
     }, Promise.resolve({}))
 
-    return new Collection(id, decryptedIndexes, grpcStub, auth, cipherSuite)
+    return new Collection(id, decryptedIndexes, grpcStub, dataServiceId, auth, cipherSuite)
   }
 
-  static async delete(id, grpcStub, auth) {
+  static async delete(id, grpcStub, dataServiceId, auth) {
     const request = await Collection.buildDeleteCollectionRequest(id)
-    const _response = await Collection.callGRPC('deleteCollection', grpcStub, auth, request)
+    const _response = await Collection.callGRPC('deleteCollection', grpcStub, dataServiceId, auth, request)
     return request.id
   }
 
-  constructor(id, indexes, grpcStub, auth, cipherSuite) {
+  constructor(id, indexes, grpcStub, dataServiceId, auth, cipherSuite) {
     this.id = id
     this.grpcStub = grpcStub
+    this.dataServiceId = dataServiceId
     this.auth = auth
     this.mapping = new Mapping(indexes)
     this.cipherSuite = cipherSuite
@@ -94,14 +94,14 @@ class Collection {
 
   async get(id) {
     const request = this.buildGetRequest(id)
-    const { source } = await Collection.callGRPC('get', this.grpcStub, this.auth, request)
+    const { source } = await Collection.callGRPC('get', this.grpcStub, this.dataServiceId, this.auth, request)
     return this.handleResponse(source)
   }
 
   async put(doc) {
     const request = await this.buildPutRequest(doc)
     // TODO: Read the ID from the response
-    const _response = await Collection.callGRPC('put', this.grpcStub, this.auth, request)
+    const _response = await Collection.callGRPC('put', this.grpcStub, this.dataServiceId, this.auth, request)
     return request.id
   }
 
@@ -131,7 +131,7 @@ class Collection {
     const query = Query.from(queryable)
     const request = await this.buildQueryRequest(query)
 
-    const { result } = await Collection.callGRPC('query', this.grpcStub, this.auth, request)
+    const { result } = await Collection.callGRPC('query', this.grpcStub, this.dataServiceId, this.auth, request)
     return SourceDecryptor(result, this.cipherSuite)
   }
 
@@ -197,11 +197,11 @@ class Collection {
     return SourceDecryptor(response.source, this.cipherSuite)
   }
 
-  static callGRPC(fun, stub, auth, requestBody) {
+  static callGRPC(fun, stub, dataServiceId, auth, requestBody) {
     return new Promise((resolve, reject) => {
       /* Start by making sure we have a token */
-      // FIXME: Don't pass the host to getToken
-      auth.getToken('localhost:50001').then((authToken) => {
+      console.log("Calling auth with", dataServiceId)
+      auth.getToken(dataServiceId).then((authToken) => {
         const request = {
           context: { authToken },
           ...requestBody
@@ -209,6 +209,7 @@ class Collection {
 
         stub[fun](request, (err, res) => {
           if (err) {
+            console.log("AAAAAAAAA")
             reject(err)
           } else {
             resolve(res)
