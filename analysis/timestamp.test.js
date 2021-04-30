@@ -9,9 +9,9 @@ test('a string date is parsed and encoded as a 64-bit integer buffer', () => {
 
 test('a Date object is encoded as a 64-bit buffer', () => {
   const timestamp = new Timestamp()
-  const [result] = timestamp.perform(new Date(2021, 3, 29, 5, 54, 39, 285))
+  const [result] = timestamp.perform(new Date("2021-04-29T05:54:39.285Z"))
 
-  expect(result.readBigUInt64BE()).toEqual(1619639679285n)
+  expect(result.readBigUInt64BE()).toEqual(1619675679285n)
 })
 
 describe('Comparisons', () => {
