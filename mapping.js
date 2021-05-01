@@ -1,4 +1,4 @@
-const { Keyword, UInt, TypeAhead, Timestamp } = require("./analysis");
+const { Bool, Keyword, UInt, TypeAhead, Timestamp } = require("./analysis");
 const ORE = require("@cipherstash/ore");
 
 class Mapping {
@@ -15,6 +15,9 @@ class Mapping {
 
       case "timestamp":
         return new Timestamp();
+
+      case "bool":
+        return new Bool();
 
       default:
         throw `Unknown analyzerName ${analyzerName}`;
