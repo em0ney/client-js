@@ -32,7 +32,7 @@ subproject_rebuild() {
 }
 
 subcommand="${1:-build}"
-case $subcommand in 
+case $subcommand in
   setup)
     subproject_setup
     ;;
@@ -50,7 +50,7 @@ case $subcommand in
     ;;
 
   build)
-    subproject_build 
+    subproject_build
     ;;
 
   *)
