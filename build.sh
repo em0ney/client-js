@@ -18,6 +18,7 @@ subproject_build() {
 }
 
 subproject_test() {
+  shellcheck "${0}"
   npm run test
 }
 
