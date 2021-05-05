@@ -9,15 +9,9 @@ class Bool extends Base {
     this.uint = new UInt()
   }
 
-  /* Tests for truthiness and then uses the UInt analyser.
-   * Mirrors the PostgreSQL boolean truthy values. */
+  /* Tests for a literal true and then uses the UInt analyser.*/
   perform(term) {
-    if (term == true
-      || term == "true"
-      || term == 1
-      || term == "1"
-      || term == "t"
-      || term == "on") {
+    if (term == true) {
       return this.uint.perform(1n)
     } else {
       return this.uint.perform(0n)
