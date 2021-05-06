@@ -1,5 +1,5 @@
 
-const JSONBigInt = require('json-bigint')
+const BSON = require('bson')
 
 // TODO: Later on custom versions of these functions could be used
 // to implement special behavour. For example, a DocumentEncryptor could
@@ -7,7 +7,7 @@ const JSONBigInt = require('json-bigint')
 // in an existing database
 
 const SourceEncryptor = async (doc, cipherSuite) => {
-  const plaintext = JSONBigInt.stringify(doc)
+  const plaintext = BSON.serialize(doc)
   return cipherSuite.encrypt(plaintext).then(({ result }) => { return result })
 }
 
@@ -15,11 +15,11 @@ const SourceDecryptor = async (cipherText, cipherSuite) => {
   if (cipherText instanceof Array) {
     // TODO: Use a decryptAll function instead
     const decryptors = cipherText.map((ct) => {
-      return cipherSuite.decrypt(ct)
+      return BSON.deserialize(cipherSuite.decrypt(ct))
     })
     return Promise.all(decryptors)
   } else {
-    return cipherSuite.decrypt(cipherText)
+    return BSON.deserialize(cipherSuite.decrypt(cipherText))
   }
 }
 
