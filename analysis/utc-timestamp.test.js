@@ -1,11 +1,4 @@
-const Timestamp = require('./timestamp');
-
-test('a string date is parsed and encoded as a 64-bit integer buffer', () => {
-  const timestamp = new Timestamp()
-  const [result] = timestamp.perform("2021-04-29T05:54:39.285Z")
-
-  expect(result.readBigUInt64BE()).toEqual(1619675679285n)
-})
+const Timestamp = require('./utc-timestamp');
 
 test('a Date object is encoded as a 64-bit buffer', () => {
   const timestamp = new Timestamp()
