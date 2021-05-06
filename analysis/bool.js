@@ -11,7 +11,7 @@ class Bool extends Base {
 
   /* Tests for a literal true and then uses the UInt analyser.*/
   perform(term) {
-    if (term == true) {
+    if (term === true) {
       return this.uint.perform(1n)
     } else {
       return this.uint.perform(0n)
