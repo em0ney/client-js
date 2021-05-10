@@ -31,7 +31,6 @@ async function run() {
     const address = process.env.CS_SERVICE_FQDN+':443'
     const clusterID = address.split('.')[0]
     const stash = await Stash.connect(address, clusterID, auth, cmk)
-    //const stash = await Stash.connect(address, process.env.CS_SERVICE_FQDN, auth, cmk)
 
     // FIXME: for some reason the return value is not the same as when getting a collection
     const _users = await stash.createCollection("users", [
