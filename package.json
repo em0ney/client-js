@@ -13,7 +13,7 @@
   "author": "Dan Draper",
   "license": "SEE LICENSE IN LICENSE.md",
   "dependencies": {
-    "@aws-crypto/client-node": "^2.0.0",
+    "@aws-crypto/client-node": "^2.1.0",
     "@cipherstash/ore": "file:../../node-ore",
     "@grpc/grpc-js": "^1.2.2",
     "@grpc/proto-loader": "^0.5.5",
