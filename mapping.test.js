@@ -1,5 +1,5 @@
 const Mapping = require('./mapping')
-const {Keyword, TypeAhead, UInt} = require('./analysis')
+const { Bool, Keyword, TypeAhead, UInt, UTCDate, UTCTimestamp } = require('./analysis')
 
 const fieldKeyCity = "c55f5b0221336878fe4b9a63e2fa89d73956c6492a40c53b312254f85ed4e209"
 const fieldKeyAge = "ef135cf590e5bac75451d3f512d9f80eaf65a4198663c5fc57ffb264c6ed0eee"
@@ -34,6 +34,21 @@ describe('Analyzer shortcuts', () => {
   test('uint analyzer correctly instantiates', () => {
     const analyzer = Mapping.analyzer('uint')
     expect(analyzer).toBeInstanceOf(UInt)
+  })
+
+  test('bool analyzer correctly instantiates', () => {
+    const analyzer = Mapping.analyzer('bool')
+    expect(analyzer).toBeInstanceOf(Bool)
+  })
+
+  test('utc-timestamp analyzer correctly instantiates', () => {
+    const analyzer = Mapping.analyzer('utc-timestamp')
+    expect(analyzer).toBeInstanceOf(UTCTimestamp)
+  })
+
+  test('utc-date analyzer correctly instantiates', () => {
+    const analyzer = Mapping.analyzer('utc-date')
+    expect(analyzer).toBeInstanceOf(UTCDate)
   })
 })
 

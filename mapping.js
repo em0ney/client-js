@@ -1,23 +1,26 @@
-const { Bool, Keyword, UInt, TypeAhead, Timestamp } = require("./analysis");
+const { Bool, Keyword, UInt, TypeAhead, UTCDate, UTCTimestamp } = require("./analysis");
 const ORE = require("@cipherstash/ore");
 
 class Mapping {
   static analyzer(analyzerName) {
     switch (analyzerName) {
       case "keyword":
-        return new Keyword();
+        return new Keyword()
 
       case "uint":
-        return new UInt();
+        return new UInt()
 
       case "typeahead":
-        return new TypeAhead();
+        return new TypeAhead()
 
-      case "timestamp":
-        return new Timestamp();
+      case "utc-timestamp":
+        return new UTCTimestamp()
+
+      case "utc-date":
+        return new UTCDate()
 
       case "bool":
-        return new Bool();
+        return new Bool()
 
       default:
         throw `Unknown analyzerName ${analyzerName}`;
