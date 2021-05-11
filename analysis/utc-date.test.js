@@ -68,60 +68,60 @@ describe('Comparisons', () => {
 describe('Query analysis', () => {
   test('equal-to', () => {
     const utcDate = new UTCDate()
-    const [tuple] = utcDate.performForQuery("==", new Date(2021, 4, 25))
+    const [tuple] = utcDate.performForQuery("==", new Date(Date.UTC(2021, 4, 25)))
 
-    expect(tuple).toEqual(Buffer.from("000001799babd400", "hex"))
+    expect(tuple).toEqual(Buffer.from("00000179a0d23000", "hex"))
   })
 
   test('greater-than or equal-to', () => {
     const utcDate = new UTCDate()
-    const [tuple] = utcDate.performForQuery(">=", new Date(2021, 4, 25))
+    const [tuple] = utcDate.performForQuery(">=", new Date(Date.UTC(2021, 4, 25)))
 
     expect(tuple).toEqual([
-      Buffer.from("000001799babd400", "hex"),
+      Buffer.from("00000179a0d23000", "hex"),
       Buffer.from("ffffffffffffffff", "hex")
     ])
   })
 
   test('greater-than', () => {
     const utcDate = new UTCDate()
-    const [tuple] = utcDate.performForQuery(">", new Date(2021, 4, 25))
+    const [tuple] = utcDate.performForQuery(">", new Date(Date.UTC(2021, 4, 25)))
 
     expect(tuple).toEqual([
-      Buffer.from("000001799babd401", "hex"),
+      Buffer.from("00000179a0d23001", "hex"),
       Buffer.from("ffffffffffffffff", "hex")
     ])
   })
 
   test('less-than or equal-to', () => {
     const utcDate = new UTCDate()
-    const [tuple] = utcDate.performForQuery("<=", new Date(2021, 4, 25))
+    const [tuple] = utcDate.performForQuery("<=", new Date(Date.UTC(2021, 4, 25)))
 
     expect(tuple).toEqual([
       Buffer.from("0000000000000000", "hex"),
-      Buffer.from("000001799babd400", "hex")
+      Buffer.from("00000179a0d23000", "hex")
     ])
   })
 
   test('less-than', () => {
     const utcDate = new UTCDate()
-    const [tuple] = utcDate.performForQuery("<", new Date(2021, 4, 25))
+    const [tuple] = utcDate.performForQuery("<", new Date(Date.UTC(2021, 4, 25)))
 
     expect(tuple).toEqual([
       Buffer.from("0000000000000000", "hex"),
-      Buffer.from("000001799babd3ff", "hex")
+      Buffer.from("00000179a0d22fff", "hex")
     ])
   })
 
   test('between', () => {
     const utcDate = new UTCDate()
-    const a = new Date(2020, 6, 1)
-    const b = new Date(2021, 5, 30)
+    const a = new Date(Date.UTC(2020, 6, 1))
+    const b = new Date(Date.UTC(2021, 5, 30))
     const [tuple] = utcDate.performForQuery("><", [a, b])
 
     expect(tuple).toEqual([
-      Buffer.from("000001730285f400", "hex"),
-      Buffer.from("0000017a5510c400", "hex")
+      Buffer.from("0000017307ac5000", "hex"),
+      Buffer.from("0000017a5a372000", "hex")
     ])
   })
 })
