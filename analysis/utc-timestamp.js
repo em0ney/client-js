@@ -41,13 +41,11 @@ class UTCTimestamp extends Base {
 
   // Term could be a date object or a 2-element array (between)
   performForQuery(predicate, term) {
-    let encoded
     if (term instanceof Array) {
-      encoded = term.map(this.encodeDate)
+      return this.uint.performForQuery(predicate, term.map(this.encodeDate))
     } else {
-      encoded = this.encodeDate(term)
+      return this.uint.performForQuery(predicate, this.encodeDate(term))
     }
-    return this.uint.performForQuery(predicate, encoded)
   }
 }
 
