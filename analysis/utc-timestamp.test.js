@@ -66,6 +66,13 @@ describe('Comparisons', () => {
 })
 
 describe('Query analysis', () => {
+  test('equal-to', () => {
+    const timestamp = new Timestamp()
+    const [tuple] = timestamp.performForQuery("==", new Date(2021, 4, 25, 8, 17, 40, 100))
+
+    expect(tuple).toEqual(Buffer.from("00000179a0748004", "hex"))
+  })
+
   test('greater-than or equal-to', () => {
     const timestamp = new Timestamp()
     const [tuple] = timestamp.performForQuery(">=", new Date(2021, 4, 25, 8, 17, 40, 100))
