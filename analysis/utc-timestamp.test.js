@@ -65,3 +65,56 @@ describe('Comparisons', () => {
   })
 })
 
+describe('Query analysis', () => {
+  test('greater-than or equal-to', () => {
+    const timestamp = new Timestamp()
+    const [tuple] = timestamp.performForQuery(">=", new Date(2021, 4, 25, 8, 17, 40, 100))
+
+    expect(tuple).toEqual([
+      Buffer.from("00000179a0748004", "hex"),
+      Buffer.from("ffffffffffffffff", "hex")
+    ])
+  })
+
+  test('greater-than', () => {
+    const timestamp = new Timestamp()
+    const [tuple] = timestamp.performForQuery(">", new Date(2021, 4, 25, 8, 17, 40, 100))
+
+    expect(tuple).toEqual([
+      Buffer.from("00000179a0748005", "hex"),
+      Buffer.from("ffffffffffffffff", "hex")
+    ])
+  })
+
+  test('less-than or equal-to', () => {
+    const timestamp = new Timestamp()
+    const [tuple] = timestamp.performForQuery("<=", new Date(2021, 4, 25, 8, 17, 40, 100))
+
+    expect(tuple).toEqual([
+      Buffer.from("0000000000000000", "hex"),
+      Buffer.from("00000179a0748004", "hex")
+    ])
+  })
+
+  test('less-than', () => {
+    const timestamp = new Timestamp()
+    const [tuple] = timestamp.performForQuery("<", new Date(2021, 4, 25, 8, 17, 40, 100))
+
+    expect(tuple).toEqual([
+      Buffer.from("0000000000000000", "hex"),
+      Buffer.from("00000179a0748003", "hex")
+    ])
+  })
+
+  test('between', () => {
+    const timestamp = new Timestamp()
+    const a = new Date(2021, 4, 25, 8)
+    const b = new Date(2021, 4, 25, 9)
+    const [tuple] = timestamp.performForQuery("><", [a, b])
+
+    expect(tuple).toEqual([
+      Buffer.from("00000179a0645300", "hex"),
+      Buffer.from("00000179a09b4180", "hex")
+    ])
+  })
+})

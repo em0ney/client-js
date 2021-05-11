@@ -39,9 +39,14 @@ class UTCTimestamp extends Base {
     }
   }
 
-  // TODO: Test this
+  // Term could be a date object or a 2-element array (between)
   performForQuery(predicate, term) {
-    const encoded = this.encodeDate(term)
+    let encoded
+    if (term instanceof Array) {
+      encoded = term.map(this.encodeDate)
+    } else {
+      encoded = this.encodeDate(term)
+    }
     return this.uint.performForQuery(predicate, encoded)
   }
 }
