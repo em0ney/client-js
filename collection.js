@@ -21,16 +21,20 @@ function asBuffer(id) {
 }
 
 class Collection {
-
-  static async create(name, indexSettings, grpcStub, dataServiceId, auth, cipherSuite) {
-    // FIXME: Don't hard-code the secret ID!
+  /*
+   * Makes a collection ref (anonymised string)
+   * from the given collection name.
+   * */
+  static async makeRef(name, dataServiceId) {
     const clusterKey = await Secrets.getSecret(`cs-cluster-secret-${dataServiceId}`)
     const clusterKeyBin = Buffer.from(clusterKey, "base64")
 
     const hmac = crypto.createHmac('sha256', clusterKeyBin)
     hmac.update(name)
-    const ref = hmac.digest()
+    return hmac.digest()
+  }
 
+  static async create(name, indexSettings, grpcStub, dataServiceId, auth, cipherSuite) {
     const indexes = {}
     indexSettings.forEach((settings, num) => {
       // When we bundle for the browser we will need to use the web crypto API
@@ -44,7 +48,7 @@ class Collection {
     }))
 
     const request = {
-      ref,
+      makeRef(name, dataServiceId),
       indexes: encryptedIndexes
     }
 
@@ -56,13 +60,7 @@ class Collection {
     this.grpcStub = grpcStub
     this.cipherSuite = cipherSuite
 
-    const clusterKey = await Secrets.getSecret(`cs-cluster-secret-${dataServiceId}`)
-    const clusterKeyBin = Buffer.from(clusterKey, "base64")
-
-    const hmac = crypto.createHmac('sha256', clusterKeyBin)
-    hmac.update(name)
-    const ref = hmac.digest()
-    const request = { ref: ref }
+    const request = { ref: makeRef(name, dataServiceId) }
     // TODO: Consolidate grpcStub, auth and hostname into one class
     const {id, indexes} = await Collection.callGRPC('collectionInfo', grpcStub, dataServiceId, auth, request)
 
@@ -77,13 +75,7 @@ class Collection {
   }
 
   static async delete(name, grpcStub, dataServiceId, auth) {
-    const clusterKey = await Secrets.getSecret(`cs-cluster-secret-${dataServiceId}`)
-    const clusterKeyBin = Buffer.from(clusterKey, "base64")
-
-    const hmac = crypto.createHmac('sha256', clusterKeyBin)
-    hmac.update(name)
-    const ref = hmac.digest()
-    const request = { ref: ref }
+    const request = { ref: makeRef(name, dataServiceId) }
 
     const _response = await Collection.callGRPC('deleteCollection', grpcStub, dataServiceId, auth, request)
     return request.id
