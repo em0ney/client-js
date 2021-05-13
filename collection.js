@@ -56,7 +56,6 @@ class Collection {
     this.grpcStub = grpcStub
     this.cipherSuite = cipherSuite
 
-    // FIXME: Don't hard-code the secret ID!
     const clusterKey = await Secrets.getSecret(`cs-cluster-secret-${dataServiceId}`)
     const clusterKeyBin = Buffer.from(clusterKey, "base64")
 
@@ -77,8 +76,15 @@ class Collection {
     return new Collection(id, decryptedIndexes, grpcStub, dataServiceId, auth, cipherSuite)
   }
 
-  static async delete(id, grpcStub, dataServiceId, auth) {
-    const request = await Collection.buildDeleteCollectionRequest(id)
+  static async delete(name, grpcStub, dataServiceId, auth) {
+    const clusterKey = await Secrets.getSecret(`cs-cluster-secret-${dataServiceId}`)
+    const clusterKeyBin = Buffer.from(clusterKey, "base64")
+
+    const hmac = crypto.createHmac('sha256', clusterKeyBin)
+    hmac.update(name)
+    const ref = hmac.digest()
+    const request = { ref: ref }
+
     const _response = await Collection.callGRPC('deleteCollection', grpcStub, dataServiceId, auth, request)
     return request.id
   }
@@ -104,7 +110,6 @@ class Collection {
     const _response = await Collection.callGRPC('put', this.grpcStub, this.dataServiceId, this.auth, request)
     return request.id
   }
-
 
   /* Can be used in several ways:
    *
@@ -138,13 +143,6 @@ class Collection {
   buildGetRequest(id) {
     return {
       collectionId: this.id,
-      id: asBuffer(id)
-    }
-  }
-
-  static buildDeleteCollectionRequest(id) {
-    return {
-      collectionId: id,
       id: asBuffer(id)
     }
   }
