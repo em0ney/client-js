@@ -28,7 +28,7 @@ async function queryWithAssertion(collection, query, assertion) {
 async function run() {
   try {
     const cmk = process.env.CS_DEV_CMK
-    const address = process.env.CS_SERVICE_FQDN //+':443'
+    const address = process.env.CS_SERVICE_FQDN
     const clusterID = address.split('.')[0]
     const stash = await Stash.connect(address, clusterID, auth, cmk)
 

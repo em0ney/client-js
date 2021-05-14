@@ -48,9 +48,11 @@ class Collection {
     }))
 
     const request = {
-      makeRef(name, dataServiceId),
+      ref: await Collection.makeRef(name, dataServiceId),
       indexes: encryptedIndexes
     }
+
+    console.log(request)
 
     const response = await Collection.callGRPC('createCollection', grpcStub, dataServiceId, auth, request)
     return response
@@ -60,7 +62,7 @@ class Collection {
     this.grpcStub = grpcStub
     this.cipherSuite = cipherSuite
 
-    const request = { ref: makeRef(name, dataServiceId) }
+    const request = { ref: await Collection.makeRef(name, dataServiceId) }
     // TODO: Consolidate grpcStub, auth and hostname into one class
     const {id, indexes} = await Collection.callGRPC('collectionInfo', grpcStub, dataServiceId, auth, request)
 
@@ -75,7 +77,7 @@ class Collection {
   }
 
   static async delete(name, grpcStub, dataServiceId, auth) {
-    const request = { ref: makeRef(name, dataServiceId) }
+    const request = { ref: await Collection.makeRef(name, dataServiceId) }
 
     const _response = await Collection.callGRPC('deleteCollection', grpcStub, dataServiceId, auth, request)
     return request.id
