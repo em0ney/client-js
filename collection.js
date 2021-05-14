@@ -52,8 +52,6 @@ class Collection {
       indexes: encryptedIndexes
     }
 
-    console.log(request)
-
     const response = await Collection.callGRPC('createCollection', grpcStub, dataServiceId, auth, request)
     return response
   }

@@ -8,7 +8,7 @@
     "url": "git://github.com/cipherstash/cipherstash-js.git"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest --detectOpenHandles"
   },
   "author": "Dan Draper",
   "license": "SEE LICENSE IN LICENSE.md",
