@@ -43,7 +43,7 @@ class Collection {
     })
 
     const encryptedIndexes = await Promise.all(Object.entries(indexes).map(async ([fieldId, indexSettings]) => {
-      const { result } = await cipherSuite.encrypt(JSON.stringify(indexSettings))
+      const { result } = await cipherSuite.encrypt(indexSettings)
       return { field_id: parseInt(fieldId), settings: result }
     }))
 
@@ -129,6 +129,7 @@ class Collection {
     const request = await this.buildQueryRequest(query)
 
     const { result } = await Collection.callGRPC('query', this.grpcStub, this.dataServiceId, this.auth, request)
+
     return SourceDecryptor(result, this.cipherSuite)
   }
 

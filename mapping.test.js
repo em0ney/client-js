@@ -1,8 +1,8 @@
 const Mapping = require('./mapping')
 const { Bool, Keyword, TypeAhead, UInt, UTCDate, UTCTimestamp } = require('./analysis')
 
-const fieldKeyCity = "c55f5b0221336878fe4b9a63e2fa89d73956c6492a40c53b312254f85ed4e209"
-const fieldKeyAge = "ef135cf590e5bac75451d3f512d9f80eaf65a4198663c5fc57ffb264c6ed0eee"
+const fieldKeyCity = Buffer.from("c55f5b0221336878fe4b9a63e2fa89d73956c6492a40c53b312254f85ed4e209", "hex")
+const fieldKeyAge = Buffer.from("ef135cf590e5bac75451d3f512d9f80eaf65a4198663c5fc57ffb264c6ed0eee", "hex")
 
 
 const cityAndAgeMapper = new Mapping({

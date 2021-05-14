@@ -28,7 +28,7 @@ async function queryWithAssertion(collection, query, assertion) {
 async function run() {
   try {
     const cmk = process.env.CS_DEV_CMK
-    const address = process.env.CS_SERVICE_FQDN+':443'
+    const address = process.env.CS_SERVICE_FQDN //+':443'
     const clusterID = address.split('.')[0]
     const stash = await Stash.connect(address, clusterID, auth, cmk)
 
@@ -75,9 +75,9 @@ async function run() {
 
     await queryWithAssertion(users, new Query().limit(10).where((q) =>
       ({ age: q.gte(43) })
-    ), (results) =>
-      results.length === 1 && results[0].name === "James Sadler"
-    )
+    ), (results) => {
+      return results.length === 1 && results[0].name === "James Sadler"
+    })
 
     await queryWithAssertion(users, new Query().limit(10).where((q) =>
       ({ age: q.lt(20) })

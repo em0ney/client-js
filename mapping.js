@@ -53,16 +53,14 @@ class Mapping {
   }
 
   map(indexId, fieldName, value) {
+    /* Note that key must be a buffer */
     const { analyzer, key } = this.getField(fieldName);
 
     const termBuffers = analyzer.perform(value);
 
-    // FIXME: Just keep the 2 keys (prf/prp) as separate fields within the settings (in stash)
-    // TODO: Probably should have a format version for the field settings as well
-    const fieldKeyBuffer = Buffer.from(key, "hex");
     const ore = new ORE(
-      fieldKeyBuffer.slice(0, 16),
-      fieldKeyBuffer.slice(16, 32)
+      key.slice(0, 16),
+      key.slice(16, 32)
     );
 
     return termBuffers.map((buffer) => {
@@ -75,7 +73,7 @@ class Mapping {
     const [predicate, value] = condition
 
     const {indexId, analyzer, key} = this.getField(field)
-    const fieldKeyBuffer = Buffer.from(key, 'hex')
+    const fieldKeyBuffer = key // /Buffer.from(key, 'hex')
     const ore = new ORE(fieldKeyBuffer.slice(0, 16), fieldKeyBuffer.slice(16, 32))
 
     // FIXME: performForQuery should return either a term or a "tuple" (not a single element array)
