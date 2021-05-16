@@ -83,7 +83,7 @@ async function run() {
       ({ age: q.lt(20) })
     ), (results) => results.length === 0)
 
-    await stash.deleteCollection(users.id)
+    await stash.deleteCollection("users")
     console.log("☑️ Deleted the collection");
   } catch(error) {
     console.error("FAILED", error)
