@@ -1,11 +1,11 @@
 {
-  "name": "@cipherstash/client",
-  "version": "0.0.1",
-  "description": "CipherStash client",
+  "name": "@cipherstash/beta-client",
+  "version": "0.2.0",
+  "description": "CipherStash beta client",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/cipherstash/cipherstash-js.git"
+    "url": "git://github.com/cipherstash/client-js.git"
   },
   "scripts": {
     "test": "jest --detectOpenHandles"
@@ -14,7 +14,7 @@
   "license": "SEE LICENSE IN LICENSE.md",
   "dependencies": {
     "@aws-crypto/client-node": "^2.1.0",
-    "@cipherstash/ore": "file:../../node-ore",
+    "@cipherstash/ore": "npm:@cipherstash/beta-ore@^0.2.0",
     "@grpc/grpc-js": "^1.3.0",
     "@grpc/proto-loader": "^0.6.1",
     "bson": "^4.3.0",
@@ -29,7 +29,7 @@
   },
   "files": [
     "*.js",
-    "dist/*",
-    "analysis/*"
+    "dist/**/*",
+    "analysis/**/*"
   ]
 }
