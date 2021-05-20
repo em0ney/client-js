@@ -71,10 +71,10 @@ class AuthToken {
    */
   federateToken(accessToken) {
     if (this.federation) {
-      const { IdentityPoolId, region } = this.federation
+      const { identityPoolId, region } = this.federation
 
       AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-        IdentityPoolId: IdentityPoolId,
+        IdentityPoolId: identityPoolId,
         Logins: {
           [this.idpHost]: accessToken
         }
