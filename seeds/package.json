@@ -10,6 +10,6 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@cipherstash/client": "../",
-    "faker": "^5.5.0"
+    "faker": "^5.5.3"
   }
 }
